@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 
@@ -18,19 +19,26 @@ import { AuthService } from '../services/auth.service';
         New Thread
       </a>
     
-      <div class="right header item">
-        {{ authService.user.name }}
-      </div>
+      <a class="right item"
+        (click)="logout()">
+        Logout ({{ authService.user.name }})
+      </a>
     </div>
   `
 })
 export class TopMenuComponent {
   @Input() selected: string = 'none';
 
-  constructor(public authService: AuthService) {
+  constructor(
+    public authService: AuthService,
+    private router: Router) {
 
   }
 
+  logout() {
+    this.authService.deauthenticate();
+    this.router.navigate(['/login']);
+  }
 }
 
 

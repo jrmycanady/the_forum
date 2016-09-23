@@ -1,6 +1,11 @@
-NEXT STEP
 
-- MOVE TO NEW AUTH SERVICE.
+#### Completed
+* [auth] Provide logout function on menu item.
+
+#### TODO
+* 
+
+# TODO
 
 
 # ToDo
@@ -37,6 +42,8 @@ NEXT STEP
 * [auth] User validation via email.
 * Sanatize input with bleach
 * Allow markdown posts.
+
+Load guard on change.
 
 
 [theard-list] Denote threads that have posts new to the user.
