@@ -30,7 +30,8 @@ import { Post } from '../models/post.model';
                   *ngFor="let p of posts">
                 
                 <div class="middle aligned content">
-                    {{ p.content }}
+                  <h3> {{ p.username }} </h3>
+                  {{ p.content }}
                 </div>
               </div>
             </div>

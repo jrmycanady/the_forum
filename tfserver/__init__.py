@@ -125,7 +125,7 @@ def loadMockTasks():
     """
     u1 = User(name="test", password=hash_password("test2"), email_address="test@test.example", role="admin")
     u1.save()
-    u2 = User(name="test2", password="test3", email_address="test@test.example")
+    u2 = User(name="test2", password=hash_password("test3"), email_address="test@test.example")
     u2.save()
 
     t1 = Thread(title='thread 1', user=u1, email_address="test@test.example")
@@ -381,7 +381,8 @@ def r_thread_post(user_uuid, thread_uuid):
                 'content': p.content,
                 'created_on': p.created_on,
                 'modified_on': p.modified_on,
-                'user': p.user.name
+                'username': p.user.name,
+                'user_uuid': p.user.uuid
             })
         return_data = create_success_response(return_posts)
         return(jsonify(return_data), 200)
