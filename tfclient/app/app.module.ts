@@ -13,6 +13,10 @@ import { RootComponent } from './components/root.component';
 import { TopMenuComponent } from './components/top-menu.component';
 import { ThreadViewComponent } from './components/thread-view.component';
 import { NewThreadComponent } from './components/new-thread.component';
+import { AdminComponent } from './components/admin/admin.component';
+import { AdminUsersComponent } from './components/admin/admin-users.component';
+import { AdminMenuComponent } from './components/admin/admin-menu.component';
+import { AdminNewUserComponent } from './components/admin/admin-new-user.component';
 
 // Guards
 import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
@@ -35,7 +39,11 @@ import { AuthService } from './services/auth.service';
     RootComponent,
     TopMenuComponent,
     ThreadViewComponent,
-    NewThreadComponent
+    NewThreadComponent,
+    AdminComponent,
+    AdminUsersComponent,
+    AdminMenuComponent,
+    AdminNewUserComponent
   ],
   providers: [
     appRoutingProviders,

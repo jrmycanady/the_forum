@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'top-menu',
   template: `
-    <div class="ui secondary pointing red menu">
+    <div class="ui secondary pointing inverted red menu">
       <div class="header item">
         The Forum
       </div>
@@ -18,7 +18,12 @@ import { AuthService } from '../services/auth.service';
          [routerLink]="['/thread']">
         New Thread
       </a>
-    
+      <a class="item" [class.active]="selected == 'admin'"
+         [routerLink]="['/admin']"
+         *ngIf="authService.user.role == 'admin'">
+        Admin
+      </a>
+
       <a class="right item"
         (click)="logout()">
         Logout ({{ authService.user.name }})

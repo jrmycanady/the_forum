@@ -7,6 +7,7 @@ import { Cookie } from 'ng2-cookies';
 
 import { Thread } from '../models/thread.model';
 import { Post } from '../models/post.model';
+import { User } from '../models/user.model';
 
 import { AuthService } from './auth.service';
 
@@ -35,6 +36,16 @@ export class DataService {
 
   }
 
+
+  /**
+   * Returns all the users.
+   */
+  getUsers(): Promise<User[]> {
+    return this.http.get( (this.baseUrl + 'user/'), {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => response.json().data as User[])
+                    .catch(this.handleHttpError);
+  }
 
 
   /**
@@ -95,6 +106,20 @@ export class DataService {
     return this.http.post( (this.baseUrl + 'thread/'), { title: title, content: content }, {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => { return this.createPost(response.json().data.uuid, content)})
+                    .catch(this.handleHttpError);
+  }
+
+  /**
+   * Creates a new user with the provided parameters.
+   * 
+   * @param {string} name - The users name.
+   * @param {string} password - The users password.
+   * @param {string} emailAddress = The users email address.
+   */
+  createUser(user: User) {
+    return this.http.post( (this.baseUrl + 'user/'), { name: user.name, password: user.password, email_address: user.email_address}, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => { return true })
                     .catch(this.handleHttpError);
   }
 

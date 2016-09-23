@@ -5,6 +5,9 @@ import { LoginComponent } from './components/login.component';
 import { RootComponent } from './components/root.component';
 import { ThreadViewComponent } from './components/thread-view.component';
 import { NewThreadComponent } from './components/new-thread.component';
+import { AdminComponent } from './components/admin/admin.component';
+import { AdminUsersComponent } from './components/admin/admin-users.component';
+import { AdminNewUserComponent } from './components/admin/admin-new-user.component';
 
 import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
 
@@ -12,11 +15,6 @@ const appRoutes: Routes = [
   {
     path: 'login', component: LoginComponent
   },
-  // {
-  //   path: '',
-  //   redirectTo: 'login',
-  //   pathMatch: 'full'
-  // },
   {
     path: '', 
     component: RootComponent,
@@ -36,6 +34,22 @@ const appRoutes: Routes = [
     component: NewThreadComponent,
     canActivate: [
       CanActivateViaAuthenticated
+    ]
+  },
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [
+      CanActivateViaAuthenticated
+    ],
+    children: [
+      { 
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full'
+      },
+      { path: 'users', component: AdminUsersComponent },
+      { path: 'new-user', component: AdminNewUserComponent }
     ]
   }
 ]
