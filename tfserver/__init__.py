@@ -100,7 +100,7 @@ def loadMockTasks():
     """
     Creates mock tasks for testing.
     """
-    u1 = User(name="test", password="test2", email_address="test@test.example")
+    u1 = User(name="test", password="test2", email_address="test@test.example", role="admin")
     u1.save()
     u2 = User(name="test2", password="test3", email_address="test@test.example")
     u2.save()
@@ -421,6 +421,7 @@ def r_user(user_uuid):
                 'name': u.name,
                 'uuid': u.uuid,
                 'role': u.role,
+                'email_address': u.email_address,
                 'created_on': u.created_on,
                 'modified_on': u.modified_on
             })
@@ -460,6 +461,7 @@ def r_user_id(user_uuid, managed_user_uuid=None):
             'name': u.name,
             'uuid': u.uuid,
             'role': u.role,
+            'email_address': u.email_address,
             'created_on': u.created_on,
             'modified_on': u.modified_on
         }
