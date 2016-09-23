@@ -172,43 +172,52 @@ def create_success_response(return_data):
         'data': return_data
     }
 
+def create_token_from_user(user):
+    """ Creates a new JWT token based on the user account.
+    """
+    return jwt.encode( {'user_uuid': str(user.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+
+def token_authenticate(token):
+    """
+        Validates the token and returns the user is the token is valid. None otherwise.
+    """
+    if token is not None:
+        try:
+            token = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithm=app.config['JWT_ALGORITHM'] )
+            u = User.get(User.uuid == token['user_uuid'])
+            return u
+        except User.DoesNotExist:
+            logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN." % request.remote_addr)
+            pass
+        except NameError:
+            pass
+        except jwt.exceptions.DecodeError:
+            pass
+    else:
+        logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND." % request.remote_addr)
+
+    return None
+
+
 def require_jwt_authenticate(f):
     """
     Validates if the provided token is valid, if so it sets the users id.
     """
     @wraps(f)
     def wrapper(*args, **kwargs):
-
-
-        found_token = request.headers.get('the_forum_token')
-        failed = True
-        if found_token:
-            token = jwt.decode(found_token, app.config['JWT_SECRET_KEY'], algorithm=app.config['JWT_ALGORITHM'] )
-            try:
-                u = User.get(User.uuid == token['user_uuid'])
-                failed = False
-                return f(u.uuid, *args, **kwargs)
-            except User.DoesNotExist:
-                logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN." % request.remote_addr)
-                pass
-            except NameError:
-                pass
+        u = token_authenticate(request.headers.get('the_forum_token'))
+        if u:
+            return f(u.uuid, *args, **kwargs)
         else:
-            logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND." % request.remote_addr)
-
-        if failed:
             return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
-
-
-
     return wrapper
 
 ## TODO
 def hash_password(password):
     return password
 
-@app.route('/api/auth/', methods=['POST'])
+@app.route('/api/auth/', methods=['POST', 'GET'])
 def r_auth():
 
     if request.method == 'POST':
@@ -218,7 +227,8 @@ def r_auth():
         try:
             u = User.get(User.name == data['username'])
             if u.password == hash_password(data['password']):
-                new_token = jwt.encode( {'user_uuid': str(u.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+                #new_token = jwt.encode( {'user_uuid': str(u.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+                new_token = create_token_from_user(u)
                 return_data = create_success_response({
                     "the_forum_token": new_token,
                     "user": {
@@ -226,16 +236,36 @@ def r_auth():
                         'uuid': u.uuid,
                         'role': u.role}
                         })
-                logging.warning("LOGIN SUCCESS FOR %s FROM %s" % (data['username'], request.remote_addr))
+                logging.warning("LOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
                 return(jsonify(return_data))
         except User.DoesNotExist:
             pass
         except NameError:
             pass
+        except DecodeError:
+            pass
 
         logging.warning("LOGIN FAILURE FOR %s FROM %s" % (data['username'], request.remote_addr) )
         return_data = create_error_response("Failed to authentication with provided credentials", ERROR_CODES.AUTHENTICATION_FAILED)
         return(jsonify(return_data), 401)
+
+    if request.method == 'GET':
+        u = token_authenticate(request.headers.get('the_forum_token'))
+        if u:
+            new_token = create_token_from_user(u)
+            return_data = create_success_response({
+                "the_forum_token": new_token,
+                "user": {
+                    'name': u.name,
+                    'uuid': u.uuid,
+                    'role': u.role}
+                    })
+            logging.warning("RELOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
+            return(jsonify(return_data))
+        else:
+            logging.warning("RELOGIN FAILURE FROM %s" % (request.remote_addr) )
+            return_data = create_error_response("Failed to authentication with provided credentials", ERROR_CODES.AUTHENTICATION_FAILED)
+            return(jsonify(return_data), 401)
 
 
 @app.route('/api/thread/', methods=['GET','POST'])
