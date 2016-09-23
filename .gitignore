@@ -1,0 +1,10 @@
+tfclient/typings/**
+tfclient/node_modules
+tfclient/dist/
+tfclient/**/*npm-debug-log.*
+tfclient/*.js
+tfclient/*.js.map
+tfclient/semantic
+virtenv
+tfserver/__pycache__
+data.db

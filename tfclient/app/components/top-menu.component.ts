@@ -1,0 +1,26 @@
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'top-menu',
+  template: `
+    <div class="ui secondary pointing red menu">
+      <div class="header item">
+        The Forum
+      </div>
+      <a class="item" [class.active]="selected == 'threads'"
+         [routerLink]="['/']">
+        Threads
+      </a>
+      <a class="item" [class.active]="selected == 'thread'"
+         [routerLink]="['/thread']">
+        New Thread
+      </a>
+    </div>
+  `
+})
+export class TopMenuComponent {
+  @Input() selected: string = 'none';
+
+}
+
+
