@@ -1,8 +1,12 @@
 import { Component, Input } from '@angular/core';
 
 import { DataService } from '../services/data.service';
+import { AuthService } from '../services/auth.service';
+
 import { Thread } from '../models/thread.model';
-import { TopMenuComponent } from './top-menu.component';
+import { TopMenuComponent } from './top-menu.component'
+
+
 
 @Component({
   selector: 'root-component',
@@ -32,7 +36,9 @@ export class RootComponent {
   threads = Array<Thread>();
   selected: string = 'threads';
 
-  constructor(public dataService: DataService) {
+  constructor(
+    public dataService: DataService,
+    public authService: AuthService) {
 
   }
 

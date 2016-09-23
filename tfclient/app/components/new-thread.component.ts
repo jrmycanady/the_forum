@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { DataService } from '../services/data.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'new-thread-form',
@@ -57,7 +58,8 @@ export class NewThreadComponent {
   constructor(
     public dataService: DataService,
     private route: ActivatedRoute,
-    private router: Router) {
+    private router: Router,
+    public authService: AuthService) {
 
 
   }

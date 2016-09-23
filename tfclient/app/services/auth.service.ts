@@ -4,6 +4,8 @@ import { Headers, Http } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 import { Cookie } from 'ng2-cookies';
 
+import { User } from '../models/user.model';
+
 @Injectable()
 /**
  * Provides authentication services for access to the API.
@@ -14,13 +16,10 @@ export class AuthService {
   isAuthenticated: boolean = false;
   authToken: string;
   authJSONHeader: Headers;
+  user: User = new User();
 
   constructor(
-    private http: Http) {
-
-
-  }
-
+    private http: Http) { }
 
   /**
    * Attemps to autheticate with the REST API.
@@ -41,12 +40,11 @@ export class AuthService {
                     .catch(response => { return false });
   }
 
-
   /**
    * Processes the successful autentication request.
    */
   processSuccessfulAuthentication = (response) => {
-    this.setAuthenticated(response.json().data.the_forum_token);
+    this.setAuthenticated(response.json().data.the_forum_token, response.json().data.user);
     Cookie.set('the_forum_token', this.authToken, 30);
 
     return true;
@@ -59,6 +57,8 @@ export class AuthService {
     Cookie.delete('the_forum_token');
     this.isAuthenticated = false;
     this.authToken = null;
+    this.user = new User();
+    
   }
 
   /**
@@ -66,13 +66,17 @@ export class AuthService {
    * 
    * @param {string} token - The token to be used for authentication.
    */
-  setAuthenticated(token: string) {
+  setAuthenticated(token: string, user: any) {
     this.isAuthenticated = true;
     this.authToken = token
     this.authJSONHeader = new Headers({
       'Content-Type': 'application/json',
       'the_forum_token': this.authToken
     })
+    this.user = new User();
+    this.user.name = user.name;
+    this.user.uuid = user.uuid;
+    this.user.role = user.role;
   }
 
   /**
@@ -83,7 +87,11 @@ export class AuthService {
     {
       let c = Cookie.get('the_forum_token');
       if(c) {
-        this.setAuthenticated(c);
+
+        // Attempt to load user settings using the cookie.
+        
+
+        this.setAuthenticated(c, {'uuid': 'uuid', 'name': 'name', 'role': 'role'});
       }
     }
   }

@@ -219,7 +219,13 @@ def r_auth():
             u = User.get(User.name == data['username'])
             if u.password == hash_password(data['password']):
                 new_token = jwt.encode( {'user_uuid': str(u.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
-                return_data = create_success_response({"the_forum_token": new_token})
+                return_data = create_success_response({
+                    "the_forum_token": new_token,
+                    "user": {
+                        'name': u.name,
+                        'uuid': u.uuid,
+                        'role': u.role}
+                        })
                 logging.warning("LOGIN SUCCESS FOR %s FROM %s" % (data['username'], request.remote_addr))
                 return(jsonify(return_data))
         except User.DoesNotExist:

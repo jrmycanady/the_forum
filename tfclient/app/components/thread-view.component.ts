@@ -4,6 +4,8 @@ import { Router, ActivatedRoute }       from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 
 import { DataService } from '../services/data.service';
+import { AuthService } from '../services/auth.service';
+
 import { Thread } from '../models/thread.model';
 import { TopMenuComponent } from './top-menu.component';
 import { Post } from '../models/post.model';
@@ -82,6 +84,7 @@ export class ThreadViewComponent {
 
   constructor(
     public dataService: DataService,
+    public authService: AuthService,
     private route: ActivatedRoute) {
 
   }

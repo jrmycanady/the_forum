@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 
+import { AuthService } from '../services/auth.service';
+
 @Component({
   selector: 'top-menu',
   template: `
@@ -15,11 +17,19 @@ import { Component, Input } from '@angular/core';
          [routerLink]="['/thread']">
         New Thread
       </a>
+    
+      <div class="right header item">
+        {{ authService.user.name }}
+      </div>
     </div>
   `
 })
 export class TopMenuComponent {
   @Input() selected: string = 'none';
+
+  constructor(public authService: AuthService) {
+
+  }
 
 }
 

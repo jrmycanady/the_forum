@@ -32,14 +32,7 @@ export class DataService {
     private router: Router,
     public authService: AuthService) { 
 
-    // Load a token if it's there.
-    let cookieToken = Cookie.get('the_forum_token');
-    if(cookieToken) {
-      console.log('Found cookie: ' + cookieToken);
-      this.authenticationToken = cookieToken;
-      this.isAuthenticated = true;
-      
-    }
+
   }
 
 
@@ -114,6 +107,8 @@ export class DataService {
     if(error.status == 401 ){
       // Nolonger authorized so kill the token and bail.
       this.authService.deauthenticate();
+      this.router.navigate(['/login']);
+      return false;
     } else {
       return false;
     }
