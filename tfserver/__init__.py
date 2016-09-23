@@ -12,6 +12,8 @@ from functools import wraps
 
 from enum import Enum
 
+from argon2 import PasswordHasher
+
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField
 import peewee
 
@@ -37,6 +39,26 @@ app.config['DEBUG'] = True
 # Build the database.
 db = SqliteDatabase('./data.db', threadlocals=True)
 
+# Global argon2 password hasher.
+ph = PasswordHasher()
+
+def hash_password(password):
+    """ Hashes the password using the proper algorithm.
+    """
+    return ph.hash(password)
+
+def validate_hashed_password(hash, password):
+    """ Validates the hashed password matches the password.
+    """
+    try:
+        ph.verify(hash, password)
+        return True
+    except argon2.exceptions.VerifyMismatchError:
+        pass
+    except argon2.exceptions.VerificationError:
+        pass
+
+    return False
 
 def utc_datetime_now():
     """
@@ -71,6 +93,7 @@ class User(BaseModel):
     modified_on = DateTimeField(default=utc_datetime_now)
 
 
+
 class Thread(BaseModel):
     """
     Represents a thread in the forum.
@@ -100,7 +123,7 @@ def loadMockTasks():
     """
     Creates mock tasks for testing.
     """
-    u1 = User(name="test", password="test2", email_address="test@test.example", role="admin")
+    u1 = User(name="test", password=hash_password("test2"), email_address="test@test.example", role="admin")
     u1.save()
     u2 = User(name="test2", password="test3", email_address="test@test.example")
     u2.save()
@@ -213,9 +236,7 @@ def require_jwt_authenticate(f):
             return(jsonify(return_data), 401)
     return wrapper
 
-## TODO
-def hash_password(password):
-    return password
+
 
 @app.route('/api/auth/', methods=['POST', 'GET'])
 def r_auth():
@@ -226,7 +247,9 @@ def r_auth():
 
         try:
             u = User.get(User.name == data['username'])
-            if u.password == hash_password(data['password']):
+            # if u.password == hash_password(data['password']):
+            #if ph.verify(u.password, data['password']):
+            if validate_hashed_password(u.password, data['password']):
                 #new_token = jwt.encode( {'user_uuid': str(u.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
                 new_token = create_token_from_user(u)
                 return_data = create_success_response({
@@ -242,7 +265,11 @@ def r_auth():
             pass
         except NameError:
             pass
-        except DecodeError:
+        except jwt.exceptions.DecodeError:
+            pass
+        except argon2.exceptions.VerifyMismatchError:
+            pass
+        except argon2.exceptions.VerificationError:
             pass
 
         logging.warning("LOGIN FAILURE FOR %s FROM %s" % (data['username'], request.remote_addr) )

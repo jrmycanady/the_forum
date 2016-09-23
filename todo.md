@@ -1,26 +1,39 @@
 
 #### Completed
+* [auth] Handles long term tokens.
 * [auth] Provide logout function on menu item.
+* [admin] Basic admin component.
+* [admin] View current users.
+* [admin] Create new basic user.
+
+
 
 #### TODO
-* 
+* [auth] Has user passwords.
+* [admin] Validate input on new user add.
+* [admin] Control role on user add.
+* [auth] Require user to be "enabled".
+* [admin] Control if user is enabled.
+* [admin] Allow user editing.
+* [admin] Allow user deleting. (Cannot delete self, validate on both server and client.)
 
-# TODO
+* [auth] Allow users to register.
+* [auth] Require user to validate email address.
+
+
+#### Future Imporovements
+* [general] Use a guard on routes to pre-load data.
+* [auth] Token timeout and refresh management.
+* [operations] Setup script to run with command options.
+* [config] Load configuration from file.
+
 
 
 # ToDo
 
-* [auth] Save token and process it.
-* [auth] Allow logout or invalidation of token.
-* [auth] Return user role and info with successful authentication.
-* [admin] Create admin control that is limited to only admin role users.
-* [admin] List all users.
-* [admin] disable current users.
 * RESOVLE GUARD To wait for loading.
 
-* Logout current user.
-* Show current user in the top right.
-* [admin] Create new user.
+
 * [admin] Delete user that is not self.
 * [admin] Disable user.
 * [auth] Validate user is valid _and_ enabled.
