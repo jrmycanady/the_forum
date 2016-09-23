@@ -11,36 +11,6 @@ import { AuthService } from '../services/auth.service';
 export class CanActivateViaAuthenticated implements CanActivate {
 
   constructor(
-    public dataService: DataService,
-    private router: Router) {
-
-  }
-
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) { 
-    let url: string = state.url;
-
-    return this.checkLogin(url);
-    
-  }
-
-  checkLogin(url: string): boolean {
-    if (this.dataService.isAuthenticated) {
-      return true;
-    }
-
-    this.dataService.redirectUrl = url;
-
-    this.router.navigate(['/login']);
-    return false;
-  }
-
-
-}
-
-@Injectable()
-export class CanActivateViaAuthenticatedV2 implements CanActivate {
-
-  constructor(
     public authService: AuthService,
     private router: Router) {
 

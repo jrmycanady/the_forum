@@ -15,7 +15,7 @@ import { ThreadViewComponent } from './components/thread-view.component';
 import { NewThreadComponent } from './components/new-thread.component';
 
 // Guards
-import { CanActivateViaAuthenticated, CanActivateViaAuthenticatedV2 } from './guards/can-activate-via-authenticated.guard';
+import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
 
 // Services
 import { DataService } from './services/data.service';
@@ -41,7 +41,6 @@ import { AuthService } from './services/auth.service';
     appRoutingProviders,
     DataService,
     CanActivateViaAuthenticated,
-    CanActivateViaAuthenticatedV2,
     AuthService
   ],
   bootstrap: [ AppComponent ]
