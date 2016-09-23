@@ -1,5 +1,6 @@
 import { Injectable }    from '@angular/core';
 import { Headers, Http } from '@angular/http';
+import { Router } from '@angular/router';
 
 import 'rxjs/add/operator/toPromise';
 import { Cookie } from 'ng2-cookies';
@@ -19,7 +20,8 @@ export class AuthService {
   user: User = new User();
 
   constructor(
-    private http: Http) { }
+    private http: Http,
+    private router: Router) { }
 
   /**
    * Attemps to autheticate with the REST API.
@@ -44,6 +46,7 @@ export class AuthService {
    * Processes the successful autentication request.
    */
   processSuccessfulAuthentication = (response) => {
+
     this.setAuthenticated(response.json().data.the_forum_token, response.json().data.user);
     Cookie.set('the_forum_token', this.authToken, 30);
 
@@ -89,11 +92,64 @@ export class AuthService {
       if(c) {
 
         // Attempt to load user settings using the cookie.
-        
-
         this.setAuthenticated(c, {'uuid': 'uuid', 'name': 'name', 'role': 'role'});
       }
     }
+  }
+
+  /**
+   * Authenticates using the token saved in the cookie.
+   * 
+   * This is used to validate the cookie token is valid and to collect
+   * user information for the token. Additionally it could eventualy be
+   * used to re-authenticate tokens that may expire soon. The backend
+   * API already re-issues a new token.
+   */
+  authenticateFromToken(): Promise<boolean> | boolean {
+
+    if(!this.authToken) {
+
+      // No tokens found so try cookies.
+      let c = Cookie.get('the_forum_token')
+      if(c) {
+
+        // Cookie found so test it out.
+        let tempHeader = new Headers({
+          'Content-Type': 'application/json',
+          'the_forum_token': c
+        });
+        return this.http.get(this.authUrl, {headers: tempHeader})
+                 .toPromise()
+                 .then(this.processSuccessfulAuthentication) // Auth succeeded.
+                 .catch(this.handleFailedAuthRequest) // Auth failed.
+      }
+      else {
+        // The cookie was not found so fail because we have no token.
+        this.router.navigate(['/login']);
+        return false;
+      }
+    }
+    else {
+      // A token was found so re-auth it.
+      let tempHeader = new Headers({
+          'Content-Type': 'application/json',
+          'the_forum_token': this.authToken
+        });
+      return this.http.get(this.authUrl, {headers: tempHeader})
+                .toPromise()
+                .then(this.handleFailedAuthRequest) // Auth failed.
+    }
+
+  }
+
+  /**
+   * Handles a failed HTTP request to /auth/ by redirecting to the login page
+   * and deauthenticating the service.
+   */
+  handleFailedAuthRequest = (response) => {
+    this.deauthenticate(); 
+    this.router.navigate(['/login']);
+    return false;
   }
 
 

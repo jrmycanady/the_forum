@@ -19,26 +19,21 @@ export class CanActivateViaAuthenticated implements CanActivate {
   /**
    * Save the state url before checking if they are authorized.
    */
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) { 
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> | boolean { 
     let url: string = state.url;
 
     return this.checkAuthorization(url);
     
   }
 
-  checkAuthorization(url: string): boolean {
-    // First run a check to load any tokens.
-    this.authService.loadAndValidateToken();
+  checkAuthorization(url: string): Promise<boolean> | boolean {
 
     if (this.authService.isAuthenticated) {
       return true;
+    } else {
+      return this.authService.authenticateFromToken();
     }
 
-    // this.dataService.redirectUrl = url;
-
-    this.router.navigate(['/login']);
-    return false;
   }
-
 
 }
