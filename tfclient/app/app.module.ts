@@ -17,6 +17,10 @@ import { AdminComponent } from './components/admin/admin.component';
 import { AdminUsersComponent } from './components/admin/admin-users.component';
 import { AdminMenuComponent } from './components/admin/admin-menu.component';
 import { AdminNewUserComponent } from './components/admin/admin-new-user.component';
+import { UserComponent } from './components/user/user.component';
+import { UserMenuComponent } from './components/user/user-menu.component';
+import { UserSecurityComponent } from './components/user/user-security.component';
+
 
 // Guards
 import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
@@ -43,7 +47,10 @@ import { AuthService } from './services/auth.service';
     AdminComponent,
     AdminUsersComponent,
     AdminMenuComponent,
-    AdminNewUserComponent
+    AdminNewUserComponent,
+    UserComponent,
+    UserMenuComponent,
+    UserSecurityComponent
   ],
   providers: [
     appRoutingProviders,

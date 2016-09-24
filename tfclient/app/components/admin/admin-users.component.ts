@@ -9,7 +9,7 @@ import { User } from '../../models/user.model';
 
 
 @Component({
-  selector: 'admin-root-component',
+  selector: 'admin-users-component',
   template: `
     
     <div class="ui grid container">

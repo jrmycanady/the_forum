@@ -24,10 +24,16 @@ import { AuthService } from '../services/auth.service';
         Admin
       </a>
 
-      <a class="right item"
-        (click)="logout()">
-        Logout ({{ authService.user.name }})
-      </a>
+      <div class="right menu">
+        <a class="item" [class.active]="selected == 'user'"
+          [routerLink]="['/user']">
+          Settings
+        </a>
+        <a class="item"
+          (click)="logout()">
+          Logout ({{ authService.user.name }})
+        </a>
+      </div>
     </div>
   `
 })
