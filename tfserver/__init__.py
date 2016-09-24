@@ -321,7 +321,7 @@ def r_thread(user_uuid):
         request.get_json(force=True)
         data = request.json
 
-        u = User.get(User.name == 'test')
+        u = User.get(User.uuid == user_uuid)
         t = Thread(title=data['title'], user=u)
         t.save()
         return_data = create_success_response({
