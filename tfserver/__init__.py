@@ -13,6 +13,7 @@ from functools import wraps
 from enum import Enum
 
 from argon2 import PasswordHasher
+import argon2
 
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField
 import peewee
@@ -500,4 +501,3 @@ def r_user_id(user_uuid, managed_user_uuid=None):
         u.delete_instance(recursive=True)
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
-
