@@ -5,21 +5,25 @@
 * [admin] Basic admin component.
 * [admin] View current users.
 * [admin] Create new basic user.
-
+* [auth] Hash user passwords.
+* [user-settings] Allow users to change password.
 
 
 #### TODO
-* [auth] Has user passwords.
+
+* [user-settings] Allow users to change name. 
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.
 * [auth] Require user to be "enabled".
 * [admin] Control if user is enabled.
 * [admin] Allow user editing.
 * [admin] Allow user deleting. (Cannot delete self, validate on both server and client.)
+* [admin] Sort use list by name.
 
 * [auth] Allow users to register.
 * [auth] Require user to validate email address.
 
+* [polish] Post buttons are not attached as they should be.
 
 #### Future Imporovements
 * [general] Use a guard on routes to pre-load data.
