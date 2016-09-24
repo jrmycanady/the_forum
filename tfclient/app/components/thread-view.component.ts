@@ -56,6 +56,7 @@ import { Post } from '../models/post.model';
                     placeholder="Reply goes here..."
                     [(ngModel)]="postText"
                     name = "postText"
+                    autofocus
                     (keyup.ctrl.enter)="submitPost()"></textarea>
                 </div>
               </form>
