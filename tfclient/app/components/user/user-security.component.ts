@@ -22,9 +22,7 @@ import { User } from '../../models/user.model';
              [class.hidden]="messageHidden"
              [class.positive]="positiveMessage"
              [class.negative]="negativeMessage">
-          <div class="header">
             {{ message }}
-          </div>
         </div>
 
         <div class="ui top attached red inverted secondary menu">
@@ -76,27 +74,39 @@ export class UserSecurityComponent {
 
     }
 
+  showPasswordFailedMessage(message: string) {
+    this.message = message
+    this.positiveMessage = false;
+    this.negativeMessage = true;
+    this.messageHidden = false;
+  }
+
+  showPasswordSuccessMessage(message: string) {
+    this.newPassword1 = '';
+    this.newPassword2 = '';
+    this.message = message
+    this.positiveMessage = true;
+    this.negativeMessage = false;
+    this.messageHidden = false;
+  }
+
   updatePassword() {
-    if(this.newPassword1.length > 7 && this.newPassword2.length > 7 && this.newPassword1 == this.newPassword2) {
-      this.dataService.changeUserPassword(this.authService.user, this.newPassword1)
+    if(this.newPassword1 == this.newPassword2) {
+      if(this.newPassword1.length > 7 && this.newPassword2.length > 7) {
+        this.dataService.changeUserPassword(this.authService.user, this.newPassword1)
                     .then(success => {
                       if(success) {
-                        this.newPassword1 = '';
-                        this.newPassword1 = '';
-                        this.message = "Password successfully updated."
-                        this.positiveMessage = true;
-                        this.negativeMessage = false;
-                        this.messageHidden = false;
-                        
+                        this.showPasswordSuccessMessage("Password successfully updated.");
                       } else {
-                        alert('failed!');
+                        this.showPasswordFailedMessage("Could not update password due to server error.");
                       }
                     });
+      } else {
+        this.showPasswordFailedMessage("Password must be at least 8 characters.");
+      }
+      
     } else {
-      this.message = "Password failed to updated."
-      this.positiveMessage = false;
-      this.negativeMessage = true;
-      this.messageHidden = false;
+      this.showPasswordFailedMessage('The passwords do not match.');
     }
     
   }
