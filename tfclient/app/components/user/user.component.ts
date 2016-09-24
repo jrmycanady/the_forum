@@ -20,7 +20,7 @@ import { TopMenuComponent } from '../top-menu.component'
   `
 })
 export class UserComponent {
-  selected: string = 'settings';
+  selected: string = 'user';
 
   constructor(
     public dataService: DataService,

@@ -124,6 +124,24 @@ export class DataService {
   }
 
   /**
+   * Requests the user password to be changed.
+   * 
+   * @param {User} user - The user to change the password of.
+   * @param {string} password - The password to change to.
+   */
+  changeUserPassword(user: User, password: string) {
+    return this.http.put( (this.baseUrl + 'user/' + user.uuid), { password: password }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      if(response.json().meta.error) {
+                        return false;
+                      } else {
+                        return true;
+                      }
+                    }).catch(this.handleHttpError);
+  }
+
+  /**
    * Gloal handler for non "successful" http responses.
    * 
    * 401 - Forces an invalidation of any auth tokens.

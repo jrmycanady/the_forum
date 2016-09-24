@@ -165,6 +165,7 @@ class ERROR_CODES(Enum):
     NOT_FOUND = 3
     NOT_AVAILABLE = 4
     MISSING_PARAMETERS = 5
+    REQUEST_NOT_FULFILLED = 6
 
 
     def __str__(self):
@@ -475,7 +476,7 @@ def r_user(user_uuid):
             return_data = create_error_response('Missing a required parameter.', ERROR_CODES.MISSING_PARAMETERS)
             return(jsonify(return_data), 422)
 
-@app.route('/api/user/<string:managed_user_uuid>', methods=['GET', 'DELETE'])
+@app.route('/api/user/<string:managed_user_uuid>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
 def r_user_id(user_uuid, managed_user_uuid=None):
 
@@ -501,3 +502,22 @@ def r_user_id(user_uuid, managed_user_uuid=None):
         u.delete_instance(recursive=True)
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
+
+    if request.method == 'PUT':
+        request.get_json(force=True)
+        data = request.json
+
+        # Currently only supports updating the password for the requesting user.
+        try:
+            if(u.uuid == managed_user_uuid):
+                u.password = hash_password(data['password'])
+                u.save()
+                return_data = create_success_response([])
+                return(jsonify(return_data), 200)
+        except KeyError:
+            pass
+
+        return_data = create_error_response('The password could not be changed.', ERROR_CODES.REQUEST_NOT_FULFILLED)
+        return(jsonify(return_data), 200)
+
+
