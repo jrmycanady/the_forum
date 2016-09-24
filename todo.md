@@ -23,6 +23,12 @@
 * [auth] Allow users to register.
 * [auth] Require user to validate email address.
 
+* [deploy] Deployment Documentation
+* [deploy] Generate production ready Angular2.
+* [deploy] Restructure tfserver to allow direct running or uwsgi
+* [deploy] Provide default uwsgi ini file.
+* [deploy] Provide sample nginx file.
+
 * [polish] Post buttons are not attached as they should be.
 
 #### Future Imporovements

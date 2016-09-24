@@ -1,5 +1,30 @@
 # Aburrr Forum Documentation
 
+
+## Production Install
+
+# Install node
+curl -sL http://nsolid-deb.nodesource.com/nsolid_setup_1.x | sudo bash -
+sudo apt-get -y install nsolid-developer-bundle
+
+# Install python
+apt-get install python3 python3-venv python3-pip build-essential python-dev libffi-dev
+
+
+
+# Download source.
+git clone https://github.com/jrmycanady/the_forum.git
+cd the_forum
+
+
+# Create virual env
+pyvenv virtualenv
+source ./virtualenv/bin/activate
+
+# Install python packages
+pip install argon2_cffi flask peewee pytz uuid PyJWT
+
+
 ## REST API
 
 ### Headers
