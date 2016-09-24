@@ -20,10 +20,9 @@ import { Post } from '../models/post.model';
       </div>
       <div class="column">
         <div class="ui container">
-          <h3 class="ui top attached header">
-            <img src="./media/cookie.png" class="ui circular image">
+          <h2 class="ui top attached header">
             {{ thread.title }}
-          </h3>
+          </h2>
           <div class="ui attached segment">
             <div class="ui divided items">
               <div class="item"
@@ -37,7 +36,7 @@ import { Post } from '../models/post.model';
             </div>
           </div>
 
-          <div class="ui bottom attached segment">
+          <div class="ui attached segment">
             <div class="ui top attached segment">
               <div class="ui small basic icon buttons">
                 <button class="ui disabled button"><i class="Linkify icon"></i></button>
