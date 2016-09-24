@@ -7,11 +7,13 @@
 * [admin] Create new basic user.
 * [auth] Hash user passwords.
 * [user-settings] Allow users to change password.
+* [polish] Post buttons are not attached as they should be.
+* [user-settings] Allow users to change name. 
 
 
 #### TODO
 
-* [user-settings] Allow users to change name. 
+
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.
 * [auth] Require user to be "enabled".
@@ -29,7 +31,9 @@
 * [deploy] Provide default uwsgi ini file.
 * [deploy] Provide sample nginx file.
 
-* [polish] Post buttons are not attached as they should be.
+
+
+* [admin] Backup exports.
 
 #### Future Imporovements
 * [general] Use a guard on routes to pre-load data.

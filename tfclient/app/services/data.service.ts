@@ -8,7 +8,7 @@ import { Cookie } from 'ng2-cookies';
 import { Thread } from '../models/thread.model';
 import { Post } from '../models/post.model';
 import { User } from '../models/user.model';
-
+import { ResponseMetaData } from '../models/response-meta-data.model';
 import { AuthService } from './auth.service';
 
 
@@ -138,6 +138,26 @@ export class DataService {
                       } else {
                         return true;
                       }
+                    }).catch(this.handleHttpError);
+  }
+
+  /**
+   * Requests the users name to changed.
+   * 
+   * @param {User} user - The user to change the name of.
+   * @param {string} name - The name to change to.
+   * 
+   */
+  changeUserName(user: User, name: string): Promise<ResponseMetaData> {
+    return this.http.put( (this.baseUrl + 'user/' + user.uuid), { name: name }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().meta as ResponseMetaData;
+                      // if(response.json().meta.error) {
+                      //   return false;
+                      // } else {
+                      //   return true;
+                      // }
                     }).catch(this.handleHttpError);
   }
 

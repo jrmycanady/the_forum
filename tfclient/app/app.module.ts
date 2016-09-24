@@ -20,6 +20,7 @@ import { AdminNewUserComponent } from './components/admin/admin-new-user.compone
 import { UserComponent } from './components/user/user.component';
 import { UserMenuComponent } from './components/user/user-menu.component';
 import { UserSecurityComponent } from './components/user/user-security.component';
+import { UserProfileComponent } from './components/user/user-profile.component';
 
 
 // Guards
@@ -50,7 +51,8 @@ import { AuthService } from './services/auth.service';
     AdminNewUserComponent,
     UserComponent,
     UserMenuComponent,
-    UserSecurityComponent
+    UserSecurityComponent,
+    UserProfileComponent
   ],
   providers: [
     appRoutingProviders,

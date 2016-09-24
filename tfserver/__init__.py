@@ -166,6 +166,9 @@ class ERROR_CODES(Enum):
     NOT_AVAILABLE = 4
     MISSING_PARAMETERS = 5
     REQUEST_NOT_FULFILLED = 6
+    MINIMUM_LENGTH_NOT_MET = 7
+    PARAMETER_NOT_UNIQUE = 8
+
 
 
     def __str__(self):
@@ -507,17 +510,48 @@ def r_user_id(user_uuid, managed_user_uuid=None):
         request.get_json(force=True)
         data = request.json
 
-        # Currently only supports updating the password for the requesting user.
+        # Currently only supports updating for the requesting user.
         try:
             if(u.uuid == managed_user_uuid):
-                u.password = hash_password(data['password'])
-                u.save()
-                return_data = create_success_response([])
+                user_changed = False
+
+                # Process possible password changes.
+                if 'password' in data:
+                    # Validate the password.
+                    if len(data['password']) < 8:
+                        return_data = create_error_response('The password must be at least 8 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                    else:
+                        u.password = hash_password(data['password'])
+                        user_changed = True
+                        return_data = create_success_response([])
+                # Process user name change.
+                elif 'name' in data:
+                    
+                    # Must be of atleast one character in length.
+                    if len(data['name']) < 1:
+                        return_data = create_error_response('The users name must be at least 8 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                    else:
+                        # Must be unique. 
+                        try:
+                            uFound = User.get(User.name == data['name'])
+                            return_data = create_error_response('The users name is not unique.', ERROR_CODES.PARAMETER_NOT_UNIQUE)
+                        except User.DoesNotExist:
+                            u.name = data['name']
+                            user_changed = True
+                            return_data = create_success_response([])
+                
+                if user_changed:
+                    u.save()
                 return(jsonify(return_data), 200)
+
+                # u.password = hash_password(data['password'])
+                # u.save()
+                # return_data = create_success_response([])
+                # return(jsonify(return_data), 200)
         except KeyError:
             pass
 
-        return_data = create_error_response('The password could not be changed.', ERROR_CODES.REQUEST_NOT_FULFILLED)
+        return_data = create_error_response('The user could not be changed.', ERROR_CODES.REQUEST_NOT_FULFILLED)
         return(jsonify(return_data), 200)
 
 
