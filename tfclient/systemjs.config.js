@@ -25,7 +25,8 @@
       // other libraries
       'rxjs':                       'npm:rxjs',
       'angular2-in-memory-web-api': 'npm:angular2-in-memory-web-api',
-      'ng2-cookies':                'npm:ng2-cookies'
+      'ng2-cookies':                'npm:ng2-cookies',
+      'showdown':                   'npm:showdown/dist'
       
 
     },
@@ -44,6 +45,10 @@
       },
       'ng2-cookies': {
         main: './index.js',
+        defaultExtension: 'js'
+      },
+      'showdown': {
+        main: './showdown.js',
         defaultExtension: 'js'
       }
 

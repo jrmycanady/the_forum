@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute }       from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
 
 import { Subscription } from 'rxjs/Subscription';
+
+import { Converter } from "showdown";
 
 import { DataService } from '../services/data.service';
 import { AuthService } from '../services/auth.service';
@@ -9,6 +12,7 @@ import { AuthService } from '../services/auth.service';
 import { Thread } from '../models/thread.model';
 import { TopMenuComponent } from './top-menu.component';
 import { Post } from '../models/post.model';
+
 
 
 @Component({
@@ -30,7 +34,8 @@ import { Post } from '../models/post.model';
                 
                 <div class="middle aligned content">
                   <h3> {{ p.username }} </h3>
-                  {{ p.content }}
+                  <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
+                  
                 </div>
               </div>
             </div>
@@ -82,11 +87,13 @@ export class ThreadViewComponent {
   posts: Array<Post> = new Array<Post>();
   postText: string = '';
   selected: string = 'threads';
+  markdown: Converter = new Converter();
 
   constructor(
     public dataService: DataService,
     public authService: AuthService,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private domSanitizer: DomSanitizer) {
 
   }
 
@@ -97,7 +104,6 @@ export class ThreadViewComponent {
       this.threadUuid = params['thread_uuid'];
       this.getThreadData();
       
-        
     });
 
   }
@@ -105,6 +111,7 @@ export class ThreadViewComponent {
   getThreadData() {
     this.dataService.getThread(this.threadUuid).then(thread => this.thread = thread);
     this.dataService.getPosts(this.threadUuid).then(posts => this.posts = posts);
+    
   }
 
   submitPost() {

@@ -9,7 +9,7 @@
 * [user-settings] Allow users to change password.
 * [polish] Post buttons are not attached as they should be.
 * [user-settings] Allow users to change name. 
-
+* [post] Posts do not handle any markup like returns and such. Need to get that fixed.
 
 #### TODO
 
@@ -24,6 +24,12 @@
 
 * [auth] Allow users to register.
 * [auth] Require user to validate email address.
+
+* [security] Revisit input bleaching on everythign like username. 
+
+* [thread] Thread list pagination
+* [thread] Threads should sort bylast update. 
+
 
 * [deploy] Deployment Documentation
 * [deploy] Generate production ready Angular2.

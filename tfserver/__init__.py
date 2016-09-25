@@ -23,6 +23,7 @@ import datetime
 import pytz
 import uuid
 import logging
+import bleach
 
 # Startup the logger.
 logging.basicConfig(level=logging.DEBUG)
@@ -42,6 +43,9 @@ db = SqliteDatabase('./data.db', threadlocals=True)
 
 # Global argon2 password hasher.
 ph = PasswordHasher()
+
+def sanitize_markdown_input(input):
+    return bleach.clean(input, tags=[], attributes={}, styles=[], strip=True)
 
 def hash_password(password):
     """ Hashes the password using the proper algorithm.
@@ -93,6 +97,9 @@ class User(BaseModel):
     created_on = DateTimeField(default=utc_datetime_now)
     modified_on = DateTimeField(default=utc_datetime_now)
 
+    def sanitized_update(self, name, email_address):
+        self.name = sanitize_markdown_input(name)
+        self.email_address = sanitize_markdown_input(email_address)
 
 
 class Thread(BaseModel):
@@ -107,6 +114,9 @@ class Thread(BaseModel):
     created_on = DateTimeField(default=utc_datetime_now)
     user = ForeignKeyField(User, related_name='threads')
 
+    def sanitized_update(self, title):
+        self.title = sanitize_markdown_input(title)
+
 
 class Post(BaseModel):
     """
@@ -118,6 +128,9 @@ class Post(BaseModel):
     modified_on = DateTimeField(default=utc_datetime_now)
     user = user = ForeignKeyField(User)
     thread = ForeignKeyField(Thread, related_name='posts')
+
+    def sanitized_update(self, content):
+        self.content = sanitize_markdown_input(content)
 
 
 def loadMockTasks():
@@ -325,7 +338,8 @@ def r_thread(user_uuid):
         data = request.json
 
         u = User.get(User.uuid == user_uuid)
-        t = Thread(title=data['title'], user=u)
+        t = Thread(user=u)
+        t.sanitized_update(title=data['title'])
         t.save()
         return_data = create_success_response({
                 'title': t.title,
@@ -396,7 +410,8 @@ def r_thread_post(user_uuid, thread_uuid):
         request.get_json(force=True)
         data = request.json
         u = User.get(User.uuid == user_uuid)
-        p = Post(content = data['content'], user = u, thread = t)
+        p = Post(user = u, thread = t)
+        p.sanitized_update(content = data['content'])
         p.save()
         t.last_post_on = utc_datetime_now()
         t.save()
@@ -433,7 +448,7 @@ def r_post(user_uuid, post_uuid):
         if(p.user.uuid == user_uuid):
             request.get_json(force=True)
             data = request.json
-            p.content = data['content']
+            p.sanitized_update(data['content'])
             p.modified_on = utc_datetime_now()
             p.save()
             return_data = create_success_response([])
@@ -464,7 +479,6 @@ def r_user(user_uuid):
     if request.method == 'POST':
         request.get_json(force=True)
         data = request.json
-
 
         try:
             with db.atomic():
