@@ -23,7 +23,7 @@ import { TopMenuComponent } from './top-menu.component'
               <tr *ngFor="let t of threads">
                 <td>
                   <div *ngIf="t.last_post_on > t.last_viewed || t.last_viewed == null" class="ui red ribbon label">NEW</div>
-                  <a [routerLink]="['/thread', t.uuid]" class="red">{{ t.title }}</a>
+                  <a [routerLink]="['/thread', t.id]" class="red">{{ t.title }}</a>
                 </td>
                 <td class="right aligned collapsing">{{ t.last_post_on |date:"EEEE 'at' H:mm:ss a " }}</td>
               </tr>

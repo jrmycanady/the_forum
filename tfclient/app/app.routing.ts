@@ -27,7 +27,7 @@ const appRoutes: Routes = [
     ]
   },
   {
-    path: 'thread/:thread_uuid',
+    path: 'thread/:thread_id',
     component: ThreadViewComponent,
     canActivate: [
       CanActivateViaAuthenticated

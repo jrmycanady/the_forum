@@ -23,7 +23,7 @@ import peewee
 import jwt
 import datetime
 import pytz
-import uuid
+#import uuid
 import logging
 import bleach
 
@@ -73,11 +73,11 @@ def utc_datetime_now():
     """
     return datetime.datetime.now(pytz.utc)
 
-def new_uuid_str():
-    """
-    Returns a new UUID v4 as a string.
-    """
-    return str(uuid.uuid4())
+# def new_uuid_str():
+#     """
+#     Returns a new UUID v4 as a string.
+#     """
+#     return str(uuid.uuid4())
 
 class BaseModel(Model):
     """
@@ -90,7 +90,6 @@ class User(BaseModel):
     """
     Represents a user of the forum.
     """
-    uuid = CharField(unique=True, default=new_uuid_str)
     name = CharField(unique=True)
     password = CharField()
     role = CharField(default="user")
@@ -108,7 +107,7 @@ class Thread(BaseModel):
     """
     Represents a thread in the forum.
     """
-    uuid = CharField(default=new_uuid_str,unique=True)
+
     title = CharField()
     created_on = DateTimeField(default=utc_datetime_now)
     modified_on = DateTimeField(default=utc_datetime_now)
@@ -124,7 +123,7 @@ class Post(BaseModel):
     """
     Represents a post in the forum.
     """
-    uuid = CharField(default=new_uuid_str,unique=True)
+
     content = TextField()
     created_on = DateTimeField(default=utc_datetime_now)
     modified_on = DateTimeField(default=utc_datetime_now)
@@ -224,7 +223,7 @@ def create_success_response(return_data):
 def create_token_from_user(user):
     """ Creates a new JWT token based on the user account.
     """
-    return jwt.encode( {'user_uuid': str(user.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+    return jwt.encode( {'user_id': str(user.id)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
 
 def token_authenticate(token):
     """
@@ -233,7 +232,7 @@ def token_authenticate(token):
     if token is not None:
         try:
             token = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithm=app.config['JWT_ALGORITHM'] )
-            u = User.get(User.uuid == token['user_uuid'])
+            u = User.get(User.id == token['user_id'])
             return u
         except User.DoesNotExist:
             logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN." % request.remote_addr)
@@ -256,7 +255,7 @@ def require_jwt_authenticate(f):
     def wrapper(*args, **kwargs):
         u = token_authenticate(request.headers.get('the_forum_token'))
         if u:
-            return f(u.uuid, *args, **kwargs)
+            return f(u.id, *args, **kwargs)
         else:
             return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
@@ -276,13 +275,13 @@ def r_auth():
             # if u.password == hash_password(data['password']):
             #if ph.verify(u.password, data['password']):
             if validate_hashed_password(u.password, data['password']):
-                #new_token = jwt.encode( {'user_uuid': str(u.uuid)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+                #new_token = jwt.encode( {'user_id': str(u.id)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
                 new_token = create_token_from_user(u)
                 return_data = create_success_response({
                     "the_forum_token": new_token,
                     "user": {
                         'name': u.name,
-                        'uuid': u.uuid,
+                        'id': u.id,
                         'role': u.role}
                         })
                 logging.warning("LOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
@@ -310,7 +309,7 @@ def r_auth():
                 "the_forum_token": new_token,
                 "user": {
                     'name': u.name,
-                    'uuid': u.uuid,
+                    'id': u.id,
                     'role': u.role}
                     })
             logging.warning("RELOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
@@ -323,27 +322,27 @@ def r_auth():
 
 @app.route('/api/thread/', methods=['GET','POST'])
 @require_jwt_authenticate
-def r_thread(user_uuid):
+def r_thread(user_id):
 
     if request.method == 'GET':
-        u = User.get(User.uuid == user_uuid)
+        u = User.get(User.id == user_id)
 
         return_threads = []
         # Get only the users viewedthreads.
         q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id, UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
         # Join iwth all views to get info needed.
-        q2 = Thread.select(Thread.id, Thread.uuid, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, Thread.user_id, SQL("q1.last_viewed"), User.name).join(User).join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)).order_by(Thread.modified_on.desc()).dicts()
+        q2 = Thread.select(Thread.id, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, Thread.user_id, SQL("q1.last_viewed"), User.name).join(User).join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)).order_by(Thread.modified_on.desc()).dicts()
 
         
         for t in q2:
             return_threads.append({
                 'title': t['title'],
-                'uuid': t['uuid'],
+                'id': t['id'],
                 'created_on': t['created_on'],
                 'modified_on': t['modified_on'],
                 'last_post_on': t['last_post_on'],
                 'username': t['name'],
-                #'user_uuid': t['user_uuid'],
+                #'user_id': t['user_id'],
                 'last_viewed': t['last_viewed']
             })
 
@@ -356,7 +355,7 @@ def r_thread(user_uuid):
         data = request.json
 
         # Create thread and post then save a view for the submitting user.
-        u = User.get(User.uuid == user_uuid)
+        u = User.get(User.id == user_id)
         t = Thread(user=u)
         t.sanitized_update(title=data['title'])
         
@@ -370,37 +369,37 @@ def r_thread(user_uuid):
 
         return_data = create_success_response({
                 'title': t.title,
-                'uuid': t.uuid,
+                'id': t.id,
                 'created_on': t.created_on,
                 'modified_on': t.modified_on,
                 'last_post_on': t.last_post_on,
                 'username': t.user.name,
-                'user_uuid': t.user.uuid
+                'user_id': t.user.id
             })
         return(jsonify(return_data), 200)
 
-@app.route('/api/thread/<string:thread_uuid>', methods=['GET', 'DELETE'])
+@app.route('/api/thread/<string:thread_id>', methods=['GET', 'DELETE'])
 @require_jwt_authenticate
-def r_thread_id(user_uuid, thread_uuid=None):
+def r_thread_id(user_id, thread_id=None):
 
 
 
     try:
-        t = Thread.get(Thread.uuid == thread_uuid)
+        t = Thread.get(Thread.id == thread_id)
     except Thread.DoesNotExist:
-        return_data = create_error_response('Could not find thread with id of %s' % thread_uuid, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find thread with id of %s' % thread_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
         return_thread = {
 
             'title': t.title,
-            'uuid': t.uuid,
+            'id': t.id,
             'created_on': t.created_on,
             'modified_on': t.modified_on,
             'last_post_on': t.last_post_on,
             'username': t.user.name,
-            'user_uuid': t.user.uuid
+            'user_id': t.user.id
         }
         return_data = create_success_response(return_thread)
         return(jsonify(return_data), 200)
@@ -410,19 +409,19 @@ def r_thread_id(user_uuid, thread_uuid=None):
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
-@app.route('/api/thread/<string:thread_uuid>/post/', methods=['GET','POST'])
+@app.route('/api/thread/<string:thread_id>/post/', methods=['GET','POST'])
 @require_jwt_authenticate
-def r_thread_post(user_uuid, thread_uuid):
+def r_thread_post(user_id, thread_id):
     try:
-        t = Thread.get(Thread.uuid == thread_uuid)
+        t = Thread.get(Thread.id == thread_id)
     except Thread.DoesNotExist:
-        return_data = create_error_response('Could not find thread with id of %s' % thread_uuid, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find thread with id of %s' % thread_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
 
         # The user is viewing the posts so set their view date to now.
-        u = User.get(User.uuid == user_uuid)
+        u = User.get(User.id == user_id)
         uvt = None
         try:
             # logger.error('looking for view entry.')
@@ -440,12 +439,12 @@ def r_thread_post(user_uuid, thread_uuid):
         return_posts = []
         for p in Post.select().join(User).where(Post.thread == t).order_by(Post.created_on.asc()):
             return_posts.append({
-                'uuid': p.uuid,
+                'id': p.id,
                 'content': p.content,
                 'created_on': p.created_on,
                 'modified_on': p.modified_on,
                 'username': p.user.name,
-                'user_uuid': p.user.uuid
+                'user_id': p.user.id
             })
         return_data = create_success_response(return_posts)
         return(jsonify(return_data), 200)
@@ -453,7 +452,7 @@ def r_thread_post(user_uuid, thread_uuid):
     if request.method == 'POST':
         request.get_json(force=True)
         data = request.json
-        u = User.get(User.uuid == user_uuid)
+        u = User.get(User.id == user_id)
         p = Post(user = u, thread = t)
         p.sanitized_update(content = data['content'])
         p.save()
@@ -462,23 +461,23 @@ def r_thread_post(user_uuid, thread_uuid):
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
-@app.route('/api/post/<string:post_uuid>', methods=['GET', 'DELETE', 'PUT'])
+@app.route('/api/post/<string:post_id>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
-def r_post(user_uuid, post_uuid):
+def r_post(user_id, post_id):
     try:
-        p = Post.get(Post.uuid == post_uuid)
+        p = Post.get(Post.id == post_id)
     except Post.DoesNotExist:
-        return_data = create_error_response('Could not find post with id of %s' % post_uuid, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find post with id of %s' % post_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
         return_post = {
-            'uuid': p.uuid,
+            'id': p.id,
             'content': p.content,
             'created_on': p.created_on,
             'modified_on': p.modified_on,
             'username': p.user.name,
-            'user_uuid': p.user.uuid
+            'user_id': p.user.id
         }
         return_data = create_success_response(return_post)
         return(jsonify(return_data), 200)
@@ -489,7 +488,7 @@ def r_post(user_uuid, post_uuid):
         return(jsonify(return_data), 200)
 
     if request.method == 'PUT':
-        if(p.user.uuid == user_uuid):
+        if(p.user.id == user_id):
             request.get_json(force=True)
             data = request.json
             p.sanitized_update(data['content'])
@@ -503,7 +502,7 @@ def r_post(user_uuid, post_uuid):
 
 @app.route('/api/user/', methods=['GET', 'POST'])
 @require_jwt_authenticate
-def r_user(user_uuid):
+def r_user(user_id):
 
     if request.method == 'GET':
 
@@ -511,7 +510,7 @@ def r_user(user_uuid):
         for u in User.select().order_by(User.name):
             return_users.append({
                 'name': u.name,
-                'uuid': u.uuid,
+                'id': u.id,
                 'role': u.role,
                 'email_address': u.email_address,
                 'created_on': u.created_on,
@@ -537,20 +536,20 @@ def r_user(user_uuid):
             return_data = create_error_response('Missing a required parameter.', ERROR_CODES.MISSING_PARAMETERS)
             return(jsonify(return_data), 422)
 
-@app.route('/api/user/<string:managed_user_uuid>', methods=['GET', 'DELETE', 'PUT'])
+@app.route('/api/user/<int:managed_user_id>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
-def r_user_id(user_uuid, managed_user_uuid=None):
+def r_user_id(user_id, managed_user_id=None):
 
     try:
-        u = User.get(User.uuid == managed_user_uuid)
+        u = User.get(User.id == managed_user_id)
     except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s' % managed_user_uuid, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
         return_user = {
             'name': u.name,
-            'uuid': u.uuid,
+            'id': u.id,
             'role': u.role,
             'email_address': u.email_address,
             'created_on': u.created_on,
@@ -570,24 +569,27 @@ def r_user_id(user_uuid, managed_user_uuid=None):
 
         # Currently only supports updating for the requesting user.
         try:
-            if(u.uuid == managed_user_uuid):
+            logger.error('u.id is %s and managed_user_id is %s', (u.id, managed_user_id))
+            if(u.id == managed_user_id):
+                logger.error('id mached')
                 user_changed = False
 
                 # Process possible password changes.
                 if 'password' in data:
+                    logger.error('found password %s' % data['password'])
                     # Validate the password.
                     if len(data['password']) < 8:
-                        return_data = create_error_response('The password must be at least 8 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                        return_data = create_error_response('The password must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
                     else:
                         u.password = hash_password(data['password'])
                         user_changed = True
                         return_data = create_success_response([])
                 # Process user name change.
                 elif 'name' in data:
-                    
+                    logger.error('found name %s' % data['name'])
                     # Must be of atleast one character in length.
                     if len(data['name']) < 1:
-                        return_data = create_error_response('The users name must be at least 8 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                        return_data = create_error_response('The users name must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
                     else:
                         # Must be unique. 
                         try:

@@ -78,7 +78,7 @@ export class AuthService {
     })
     this.user = new User();
     this.user.name = user.name;
-    this.user.uuid = user.uuid;
+    this.user.id = user.id;
     this.user.role = user.role;
   }
 
@@ -92,7 +92,7 @@ export class AuthService {
       if(c) {
 
         // Attempt to load user settings using the cookie.
-        this.setAuthenticated(c, {'uuid': 'uuid', 'name': 'name', 'role': 'role'});
+        this.setAuthenticated(c, {'id': 'id', 'name': 'name', 'role': 'role'});
       }
     }
   }

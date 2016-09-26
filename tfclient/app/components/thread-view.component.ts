@@ -83,7 +83,7 @@ export class ThreadViewComponent {
 
   private sub: Subscription;
   thread: Thread = new Thread();
-  threadUuid: string;
+  threadId: string;
   posts: Array<Post> = new Array<Post>();
   postText: string = '';
   selected: string = 'threads';
@@ -101,7 +101,7 @@ export class ThreadViewComponent {
     
     // Get thread ID
     this.sub = this.route.params.subscribe(params => {
-      this.threadUuid = params['thread_uuid'];
+      this.threadId = params['thread_id'];
       this.getThreadData();
       
     });
@@ -109,13 +109,13 @@ export class ThreadViewComponent {
   }
 
   getThreadData() {
-    this.dataService.getThread(this.threadUuid).then(thread => this.thread = thread);
-    this.dataService.getPosts(this.threadUuid).then(posts => this.posts = posts);
+    this.dataService.getThread(this.threadId).then(thread => this.thread = thread);
+    this.dataService.getPosts(this.threadId).then(posts => this.posts = posts);
     
   }
 
   submitPost() {
-    this.dataService.createPost(this.threadUuid, this.postText).then(result => {
+    this.dataService.createPost(this.threadId, this.postText).then(result => {
       if(result) {
         this.postText = '';
         this.getThreadData();

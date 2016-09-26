@@ -61,10 +61,10 @@ export class DataService {
   /**
    * Returns the thread based on the ID or null if it's not found.
    * 
-   * @param {string} threadUuid - The UUID of the thread.
+   * @param {string} threadId - The Id of the thread.
    */
-  getThread(threadUuid: string): Promise<Thread> {
-    return this.http.get( (this.baseUrl + 'thread/' + threadUuid), {headers: this.authService.authJSONHeader})
+  getThread(threadId: string): Promise<Thread> {
+    return this.http.get( (this.baseUrl + 'thread/' + threadId), {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => response.json().data as Thread)
                     .catch(this.handleHttpError);
@@ -73,11 +73,11 @@ export class DataService {
   /**
    * Returns all the posts for the specified thread.
    * 
-   * @param {string} threadUuid - The UUID of the thread.
+   * @param {string} threadId - The Id of the thread.
    * @returns {Post[]} - An array of posts.
    */
-  getPosts(threadUuid: string): Promise<Array<Post>> {
-    return this.http.get( (this.baseUrl + 'thread/' + threadUuid + '/post/'), {headers: this.authService.authJSONHeader})
+  getPosts(threadId: string): Promise<Array<Post>> {
+    return this.http.get( (this.baseUrl + 'thread/' + threadId + '/post/'), {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => response.json().data as Array<Post>)
                     .catch(this.handleHttpError);
@@ -86,11 +86,11 @@ export class DataService {
   /**
    * Creats a new post on the specified thread.
    * 
-   * @param {string} threadUuid - The thread to post on.
+   * @param {string} threadId - The thread to post on.
    * @param {string} content - The content to post.
    */
-  createPost(threadUuid: string, content: string): Promise<Boolean> {
-    return this.http.post( (this.baseUrl + 'thread/' + threadUuid + '/post/'), { content: content }, {headers: this.authService.authJSONHeader})
+  createPost(threadId: string, content: string): Promise<Boolean> {
+    return this.http.post( (this.baseUrl + 'thread/' + threadId + '/post/'), { content: content }, {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => { return true })
                     .catch(this.handleHttpError);
@@ -130,7 +130,7 @@ export class DataService {
    * @param {string} password - The password to change to.
    */
   changeUserPassword(user: User, password: string) {
-    return this.http.put( (this.baseUrl + 'user/' + user.uuid), { password: password }, {headers: this.authService.authJSONHeader})
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { password: password }, {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => {
                       if(response.json().meta.error) {
@@ -149,7 +149,7 @@ export class DataService {
    * 
    */
   changeUserName(user: User, name: string): Promise<ResponseMetaData> {
-    return this.http.put( (this.baseUrl + 'user/' + user.uuid), { name: name }, {headers: this.authService.authJSONHeader})
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { name: name }, {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => {
                       return response.json().meta as ResponseMetaData;
