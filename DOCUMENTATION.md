@@ -22,7 +22,26 @@ pyvenv virtualenv
 source ./virtualenv/bin/activate
 
 # Install python packages
+pip install wheel
 pip install argon2_cffi flask peewee pytz uuid PyJWT
+
+# Test the server
+python3 run_server.py
+
+# Install production server
+pip install uwsgi
+
+# Run prodution as http
+cd tfserver
+uwsgi --http 45.55.182.132:5000 --wsgi-file __init__.py --callable app --stats 45.55.182.132:6000
+
+# Install client software
+cd tfclient
+npm install
+Download and add the semantic.css to the semantic folder in the tfclient
+
+
+
 
 
 ## REST API

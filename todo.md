@@ -8,13 +8,18 @@
 * [auth] Hash user passwords.
 * [user-settings] Allow users to change password.
 * [polish] Post buttons are not attached as they should be.
-* [user-settings] Allow users to change name. 
+* [user-settings] Allow users to change name.
+* [post] Sanatize input with bleach
+* [post] Allow markdown posts.
 * [post] Posts do not handle any markup like returns and such. Need to get that fixed.
 
 #### TODO
 
-* [bug] New thread submits without post fail but still submit.
+
+* [bug] New thread submits without post fail but still submit. - Probably need to make the thread add API expect a content value too.
 * [bug] New threads are marked new for the submitter.
+
+* [core] Remove uuids as they are not really used due a misunderstanding of peewee.
 
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.
@@ -75,8 +80,7 @@
 * [thread-view] Not allow navigation away if started post.
 * [searching] Allow it, duh.
 * [auth] User validation via email.
-* Sanatize input with bleach
-* Allow markdown posts.
+
 
 Load guard on change.
 
