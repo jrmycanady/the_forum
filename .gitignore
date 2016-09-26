@@ -6,5 +6,6 @@ tfclient/*.js
 tfclient/*.js.map
 tfclient/semantic
 virtenv
+virtualenv
 tfserver/__pycache__
 data.db

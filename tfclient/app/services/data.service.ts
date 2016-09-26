@@ -102,10 +102,10 @@ export class DataService {
    * @param {string} title - The title of the thread.
    * @param {string} content - The content for the first post.
    */
-  createThread(title: string, content: string): Promise<Boolean> {
+  createThread(title: string, content: string): Promise<ResponseMetaData> {
     return this.http.post( (this.baseUrl + 'thread/'), { title: title, content: content }, {headers: this.authService.authJSONHeader})
                     .toPromise()
-                    .then(response => { return this.createPost(response.json().data.uuid, content)})
+                    .then(response => { return response.json().meta as ResponseMetaData })
                     .catch(this.handleHttpError);
   }
 

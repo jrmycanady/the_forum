@@ -22,6 +22,7 @@ pyvenv virtualenv
 source ./virtualenv/bin/activate
 
 # Install python packages
+If windows make sure you have the visual studio 2015 build tools for C++ installed.
 pip install wheel
 pip install argon2_cffi flask peewee pytz uuid PyJWT
 

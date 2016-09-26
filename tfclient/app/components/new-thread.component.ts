@@ -15,6 +15,14 @@ import { AuthService } from '../services/auth.service';
       <div class="column">
 
         <div class="ui container form">
+
+          <div class="ui message"
+             [class.hidden]="messageHidden"
+             [class.positive]="positiveMessage"
+             [class.negative]="negativeMessage">
+            {{ message }}
+          </div>
+
           <div class="ui top attached segment">
             <input type="text" 
                    name="title" 
@@ -55,6 +63,12 @@ export class NewThreadComponent {
   threadContent: string;
   threadTitle: string;
   selected: string = 'thread';
+
+  messageHidden: boolean = true;
+  positiveMessage: boolean = false;
+  negativeMessage: boolean = false;
+  message: string = '';
+
   constructor(
     public dataService: DataService,
     private route: ActivatedRoute,
@@ -64,13 +78,36 @@ export class NewThreadComponent {
 
   }
 
+
+  showFailedMessage(message: string) {
+    this.message = message
+    this.positiveMessage = false;
+    this.negativeMessage = true;
+    this.messageHidden = false;
+  }
+
+  showSuccessMessage(message: string) {
+    this.message = message
+    this.positiveMessage = true;
+    this.negativeMessage = false;
+    this.messageHidden = false;
+  }
+
   submitThread() {
 
-    this.dataService.createThread(this.threadTitle, this.threadContent).then(result => {
-      if(result) {
-        this.router.navigate(['/']);
-      }
-    });
+    if(!this.threadContent) {
+      this.showFailedMessage('Content cannot be empty.');
+    }
+    else if(!this.threadTitle) {
+      this.showFailedMessage('Title cannot be empty.');
+    }
+    else {
+      this.dataService.createThread(this.threadTitle, this.threadContent).then(meta => {
+        if(!meta.error) {
+          this.router.navigate(['/']);
+        }
+      });
+    }
 
   }
 

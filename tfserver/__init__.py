@@ -355,10 +355,19 @@ def r_thread(user_uuid):
         request.get_json(force=True)
         data = request.json
 
+        # Create thread and post then save a view for the submitting user.
         u = User.get(User.uuid == user_uuid)
         t = Thread(user=u)
         t.sanitized_update(title=data['title'])
+        
         t.save()
+        p = Post(user=u, content=data['content'], thread=t)
+        p.save()
+
+        uvt = UserViewedThread(user = u, thread = t)        
+        uvt.last_viewed = utc_datetime_now()
+        uvt.save()
+
         return_data = create_success_response({
                 'title': t.title,
                 'uuid': t.uuid,
