@@ -13,6 +13,8 @@
 
 #### TODO
 
+* [bug] New thread submits without post fail but still submit.
+* [bug] New threads are marked new for the submitter.
 
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.

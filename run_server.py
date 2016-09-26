@@ -1,14 +1,14 @@
 from tfserver import app, db
 
-from tfserver import loadMockTasks, User, Thread, Post
+from tfserver import loadMockTasks, User, Thread, Post, UserViewedThread
 
 
 db.connect()
 
 
 
-db.drop_tables([User,Thread,Post], safe=True)
-db.create_tables([User,Thread,Post])
+db.drop_tables([User,Thread,Post,UserViewedThread], safe=True)
+db.create_tables([User,Thread,Post,UserViewedThread])
 
 loadMockTasks()
 

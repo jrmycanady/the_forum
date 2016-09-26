@@ -6,5 +6,6 @@ export class Thread {
   last_post_on: Date;
   username: string;
   user_uuid: string;
+  last_viewed: Date;
 
 }

@@ -16,6 +16,8 @@ from argon2 import PasswordHasher
 import argon2
 
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField
+from peewee import JOIN
+from peewee import SQL
 import peewee
 
 import jwt
@@ -131,6 +133,12 @@ class Post(BaseModel):
 
     def sanitized_update(self, content):
         self.content = sanitize_markdown_input(content)
+
+class UserViewedThread(BaseModel):
+    user = ForeignKeyField(User)
+    thread = ForeignKeyField(Thread)
+    last_viewed = DateTimeField(default=utc_datetime_now)
+
 
 
 def loadMockTasks():
@@ -318,17 +326,27 @@ def r_auth():
 def r_thread(user_uuid):
 
     if request.method == 'GET':
+        u = User.get(User.uuid == user_uuid)
+
         return_threads = []
-        for t in Thread.select().join(User).order_by(Thread.modified_on.desc()):
+        # Get only the users viewedthreads.
+        q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id, UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
+        # Join iwth all views to get info needed.
+        q2 = Thread.select(Thread.id, Thread.uuid, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, Thread.user_id, SQL("q1.last_viewed"), User.name).join(User).join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)).order_by(Thread.modified_on.desc()).dicts()
+
+        
+        for t in q2:
             return_threads.append({
-                'title': t.title,
-                'uuid': t.uuid,
-                'created_on': t.created_on,
-                'modified_on': t.modified_on,
-                'last_post_on': t.last_post_on,
-                'username': t.user.name,
-                'user_uuid': t.user.uuid
+                'title': t['title'],
+                'uuid': t['uuid'],
+                'created_on': t['created_on'],
+                'modified_on': t['modified_on'],
+                'last_post_on': t['last_post_on'],
+                'username': t['name'],
+                #'user_uuid': t['user_uuid'],
+                'last_viewed': t['last_viewed']
             })
+
 
         return_data = create_success_response(return_threads)
         return(jsonify(return_data), 200)
@@ -393,6 +411,23 @@ def r_thread_post(user_uuid, thread_uuid):
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
+
+        # The user is viewing the posts so set their view date to now.
+        u = User.get(User.uuid == user_uuid)
+        uvt = None
+        try:
+            # logger.error('looking for view entry.')
+
+            uvt = UserViewedThread.select().where( (UserViewedThread.user == u) & (UserViewedThread.thread == t) ).get()
+            # logger.error('found view entry')
+        except UserViewedThread.DoesNotExist:
+            # logger.error('didnt find view entry')
+            uvt = UserViewedThread(user = u, thread = t)
+        
+        uvt.last_viewed = utc_datetime_now()
+        
+        uvt.save()
+
         return_posts = []
         for p in Post.select().join(User).where(Post.thread == t).order_by(Post.created_on.asc()):
             return_posts.append({

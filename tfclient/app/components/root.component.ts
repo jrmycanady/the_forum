@@ -18,11 +18,15 @@ import { TopMenuComponent } from './top-menu.component'
       <div class="column">
         <div class="ui container">
           <table class="ui selectable small table">
+            
             <tbody>
               <tr *ngFor="let t of threads">
-                <td class="collapsing"><i class="Radio icon"></i></td>
-                <td><a [routerLink]="['/thread', t.uuid]" class="red">{{ t.title }}</a></td>
-                <td class="right aligned collapsing">{{ t.created_on |date:"yyyy.MM.dd hh:mm:ss" }}</td>
+                <td>
+                  <div *ngIf="t.last_post_on > t.last_viewed || t.last_viewed == null" class="ui red ribbon label">NEW</div>
+                  <a [routerLink]="['/thread', t.uuid]" class="red">{{ t.title }}</a>
+                </td>
+                <td class="right aligned collapsing">{{ t.last_post_on |date:"EEEE 'at' H:mm:ss a " }}</td>
+                <td>{{ t.last_viewed |date:"EEEE 'at' H:mm:ss a " }}</td>
               </tr>
             </tbody>
           </table>
