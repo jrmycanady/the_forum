@@ -23,7 +23,13 @@ import { AuthService } from '../services/auth.service';
             {{ message }}
           </div>
 
-          <div class="ui top attached segment">
+          <div class="ui top attached red inverted secondary menu">
+            <div class="header item">
+              New Thread
+            </div>
+          </div>
+
+          <div class="ui attached segment">
             <input type="text" 
                    name="title" 
                    placeholder="Thread Title"
