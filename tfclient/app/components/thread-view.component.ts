@@ -24,53 +24,60 @@ import { Post } from '../models/post.model';
       </div>
       <div class="column">
         <div class="ui container">
-          <h2 class="ui top attached header">
+          <h2 class="ui header">
             {{ thread.title }}
           </h2>
-          <div class="ui attached segment">
-            <div class="ui divided items">
-              <div class="item"
-                  *ngFor="let p of posts">
+
+
+
+          <div class="ui grid segment"
+               *ngFor="let p of posts">
+            <div class="one wide column">
+              
+              <h3 class="ui header">
+                <a href="#">{{ p. username }}</a>
+                <div class="sub header">Admin</div>
                 
-                <div class="middle aligned content">
-                  <h3> {{ p.username }} </h3>
-                  <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
-                  
-                </div>
-              </div>
+              </h3>
+                          
+            </div>
+            
+            <div class="fifteen wide column">
+              <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
             </div>
           </div>
 
-          <div class="ui attached segment">
-            <div class="ui top attached segment">
-              <div class="ui small basic icon buttons">
-                <button class="ui disabled button"><i class="Linkify icon"></i></button>
-                <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
-                <button class="ui disabled button"><i class="Header icon"></i></button>
-                <button class="ui disabled button"><i class="Bold icon"></i></button>
-                <button class="ui disabled button"><i class="Quote Left icon"></i></button>
-                <button class="ui disabled button"><i class="Italic icon"></i></button>
-                <button class="ui disabled button"><i class="Attach icon"></i></button>
-                <button class="ui disabled button"><i class="Image icon"></i></button>
-              </div>
-            </div>
-            <div class="ui bottom attached segment">
-              <form class="ui form" #postForm="ngForm">
-                <div class="field">
-                  <textarea 
-                    placeholder="Reply goes here..."
-                    [(ngModel)]="postText"
-                    name = "postText"
-                    autofocus
-                    (keyup.ctrl.enter)="submitPost()"></textarea>
-                </div>
-              </form>
+
+          <div class="ui top attached segment">
+            <div class="ui small basic icon buttons">
+              <button class="ui disabled button"><i class="Linkify icon"></i></button>
+              <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
+              <button class="ui disabled button"><i class="Header icon"></i></button>
+              <button class="ui disabled button"><i class="Bold icon"></i></button>
+              <button class="ui disabled button"><i class="Quote Left icon"></i></button>
+              <button class="ui disabled button"><i class="Italic icon"></i></button>
+              <button class="ui disabled button"><i class="Attach icon"></i></button>
+              <button class="ui disabled button"><i class="Image icon"></i></button>
             </div>
           </div>
-          <div class="ui two bottom attached buttons">
+          <div class="ui attached segment">
+            <form class="ui form" #postForm="ngForm">
+              <div class="field">
+                <textarea 
+                  placeholder="Reply goes here..."
+                  [(ngModel)]="postText"
+                  name = "postText"
+                  autofocus
+                  (keyup.ctrl.enter)="submitPost()"></textarea>
+              </div>
+            </form>
+          </div>
+            <div class="ui two bottom attached buttons">
             <div class="ui button">Reset</div>
             <div class="ui button" (click)="submitPost()">Submit</div>
           </div>
+
+          
 
 
         </div>
