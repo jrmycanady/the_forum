@@ -48,7 +48,9 @@ import { Post } from '../models/post.model';
                   <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
                 </div>
                 <div class="one wide column">
-                  <div class="ui vertical small basic icon buttons">
+                  <div 
+                       *ngIf="authService.user.id == p.user_id"
+                       class="ui vertical small basic icon buttons">
                     <button class="ui button"><i class="edit icon"></i></button>
                     <button class="ui button"><i class="erase icon"></i></button>
                   </div>
@@ -128,7 +130,6 @@ export class ThreadViewComponent {
   getThreadData() {
     this.dataService.getThread(this.threadId).then(thread => this.thread = thread);
     this.dataService.getPosts(this.threadId).then(posts => this.posts = posts);
-    
   }
 
   submitPost() {
