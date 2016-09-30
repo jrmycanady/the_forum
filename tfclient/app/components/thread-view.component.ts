@@ -45,11 +45,27 @@ import { Post } from '../models/post.model';
             <div class="fourteen wide column">
               <div class="ui grid">
                 <div class="fifteen wide column">
-                  <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
+                  <div *ngIf="editedPost.id != p.id"
+                       [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
+                  <div class="ui form" *ngIf="editedPost.id == p.id">
+                    <div class="field">
+                      <textarea
+                         
+                        placeholder=""
+                        [(ngModel)]="editedPost.content"
+                        name = "editPostContent"
+                        autofocus
+                        (keyup.ctrl.enter)="submitPost()" style="margin-bottom: 3px;"></textarea>
+                      <button class="ui left floated button" (click)="cancelPostEdit()">Cancel</button>
+                      <button class="ui right floated button">Save Update</button>
+                    </div>
+                  </div>
                 </div>
                 <div class="one wide column">
-                  <div class="ui vertical small basic icon buttons">
-                    <button class="ui button"><i class="edit icon"></i></button>
+                  <div 
+                       *ngIf="authService.user.id == p.user_id"
+                       class="ui vertical small basic icon buttons">
+                    <button class="ui button" (click)="editPost(p.id, p.content)"><i class="edit icon"></i></button>
                     <button class="ui button"><i class="erase icon"></i></button>
                   </div>
                 </div>
@@ -105,6 +121,8 @@ export class ThreadViewComponent {
   postText: string = '';
   selected: string = 'threads';
   markdown: Converter = new Converter();
+  editedPost: Post = new Post();
+  editPostEnabled: Boolean = false;
 
   constructor(
     public dataService: DataService,
@@ -128,7 +146,6 @@ export class ThreadViewComponent {
   getThreadData() {
     this.dataService.getThread(this.threadId).then(thread => this.thread = thread);
     this.dataService.getPosts(this.threadId).then(posts => this.posts = posts);
-    
   }
 
   submitPost() {
@@ -140,6 +157,16 @@ export class ThreadViewComponent {
     });
   }
 
+  editPost(id: string, content: string) {
+    this.editedPost.id = id;
+    this.editedPost.content = content;
+  }
+
+  cancelPostEdit() {
+    this.editedPost.id = "";
+    this.editedPost.content = "";
+
+  }
 
   
   
