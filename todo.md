@@ -33,8 +33,10 @@
 * [stats] Track posts per user.
 * [stats] Track threads per user.
 * [user] Add user "join" date.
-
-
+* [user] Add "enabled" option to user account. 
+* [notification] Allow users to be notified on new posts to viewed threads.
+* [notification] Allow users to be notifeid on new threads.
+* [general] Button disabling on REST calls. (Prevent double submit, etc.)
 
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.
