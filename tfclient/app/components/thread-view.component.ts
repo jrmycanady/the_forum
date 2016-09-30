@@ -32,28 +32,18 @@ import { Post } from '../models/post.model';
 
           <div class="ui grid segment"
                *ngFor="let p of posts">
-            <div class="two wide column">
+            <div class="one wide column">
               
               <h3 class="ui header">
                 <a href="#">{{ p. username }}</a>
                 <div class="sub header">Admin</div>
                 
               </h3>
- 
+                          
             </div>
             
-            <div class="fourteen wide column">
-              <div class="ui grid">
-                <div class="fifteen wide column">
-                  <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
-                </div>
-                <div class="one wide column">
-                  <div class="ui vertical small basic icon buttons">
-                    <button class="ui button"><i class="edit icon"></i></button>
-                    <button class="ui button"><i class="erase icon"></i></button>
-                  </div>
-                </div>
-              </div>
+            <div class="fifteen wide column">
+              <div [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(p.content))"></div>
             </div>
           </div>
 
