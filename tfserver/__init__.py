@@ -484,7 +484,7 @@ def r_post(user_id, post_id):
 
     if request.method == 'DELETE':
         p.delete_instance()
-        return_data = create_error_response([])
+        return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
     if request.method == 'PUT':
@@ -499,6 +499,7 @@ def r_post(user_id, post_id):
         else:
             return_data = create_error_response('User does not have permissions to edit the post to edit the post.', ERROR_CODES.UNAUTHORIZED)
             return(jsonify(return_data), 401)
+
 
 @app.route('/api/user/', methods=['GET', 'POST'])
 @require_jwt_authenticate

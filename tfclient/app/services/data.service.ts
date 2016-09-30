@@ -97,6 +97,31 @@ export class DataService {
   }
 
   /**
+   * Deletes the post from the system.
+   * 
+   * @param {Post} post - The post to delete.
+   */
+  deletePost(post: Post): Promise<Boolean> {
+    return this.http.delete( (this.baseUrl + 'post/' + post.id), { headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => { return true })
+                    .catch(this.handleHttpError);
+  }
+
+  /**
+   * Updates a posts content.
+   * 
+   * @param {string} postId - The ID of the post.
+   * @param {string} content - The new content of the post.
+   */
+  updatePost(postId: string, content: string): Promise<Boolean> {
+    return this.http.put( (this.baseUrl + 'post/' + postId), { content: content }, { headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => { return true })
+                    .catch(this.handleHttpError);
+  }
+
+  /**
    * Creates a new thread with one new post.
    * 
    * @param {string} title - The title of the thread.

@@ -57,7 +57,7 @@ import { Post } from '../models/post.model';
                         autofocus
                         (keyup.ctrl.enter)="submitPost()" style="margin-bottom: 3px;"></textarea>
                       <button class="ui left floated button" (click)="cancelPostEdit()">Cancel</button>
-                      <button class="ui right floated button">Save Update</button>
+                      <button class="ui right floated button" (click)="submitPostEdit(p)">Save Update</button>
                     </div>
                   </div>
                 </div>
@@ -66,7 +66,7 @@ import { Post } from '../models/post.model';
                        *ngIf="authService.user.id == p.user_id"
                        class="ui vertical small basic icon buttons">
                     <button class="ui button" (click)="editPost(p.id, p.content)"><i class="edit icon"></i></button>
-                    <button class="ui button"><i class="erase icon"></i></button>
+                    <button class="ui button" (click)="deletePost(p)"><i class="erase icon"></i></button>
                   </div>
                 </div>
               </div>
@@ -148,6 +148,16 @@ export class ThreadViewComponent {
     this.dataService.getPosts(this.threadId).then(posts => this.posts = posts);
   }
 
+  deletePost(p: Post) {
+    this.dataService.deletePost(p).then(result => {
+      if(result) {
+        this.getThreadData();
+      } else {
+        // There was an error.
+      }
+    })
+  }
+
   submitPost() {
     this.dataService.createPost(this.threadId, this.postText).then(result => {
       if(result) {
@@ -155,6 +165,18 @@ export class ThreadViewComponent {
         this.getThreadData();
       }
     });
+  }
+
+  submitPostEdit(p: Post) {
+    this.dataService.updatePost(this.editedPost.id, this.editedPost.content).then(result => {
+      if(result) {
+        p.content = this.editedPost.content;
+        this.cancelPostEdit();
+        // Update post and save.
+      } else {
+        // Popup error.
+      }
+    })
   }
 
   editPost(id: string, content: string) {
@@ -165,7 +187,6 @@ export class ThreadViewComponent {
   cancelPostEdit() {
     this.editedPost.id = "";
     this.editedPost.content = "";
-
   }
 
   
