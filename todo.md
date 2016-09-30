@@ -17,10 +17,11 @@
 * [core] Remove uuids as they are not really used due a misunderstanding of peewee.
 * [thread] Threads should sort bylast update. 
 * [thread-view] Fix look and feel of posts.
-
-#### TODO
 * [post] Allow post editing by user.
 * [post] Allow post deletion by user.
+
+#### TODO
+
 * [post] Ghost post instead of actually deleting it.
 * [post] Markdown preview
 * [post] Markdown help menu.
