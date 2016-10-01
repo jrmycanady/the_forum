@@ -31,6 +31,8 @@ import { AuthService } from '../services/auth.service';
 
           <div class="ui attached segment">
             <input type="text" 
+                   tabindex="1"
+                   autofocus
                    name="title" 
                    placeholder="Thread Title"
                    [(ngModel)]="threadTitle">
@@ -51,7 +53,8 @@ import { AuthService } from '../services/auth.service';
           </div>
 
           <div class="ui attached segment">
-            <textarea rows="15" name="title" 
+            <textarea rows="15" name="title"
+                      tabindex="2"
                       placeholder="Thread First Post"
                       [(ngModel)]="threadContent"
                       name="threadContent"></textarea>
