@@ -23,10 +23,6 @@ import { User } from '../../models/user.model';
             <i class="plus icon"></i>
             Add User
           </a>
-          <a class="disabled item">
-            <i class="delete icon"></i>
-            Delete Users
-          </a>
 
           <div class="right menu">
             <div class="ui right aligned category disabled fluid search item">
@@ -39,35 +35,46 @@ import { User } from '../../models/user.model';
         </div>
         <div class="ui bottom attached segment">
           <div class="ui divided items">
-            <div class="item"
-              *ngFor="let u of users">
-              <div class="ui image">
-                <h2 class="ui icon header">
-                  
-                  <i class="circular user icon"></i>
-                </h2>
-              </div>
-              <div class="content">
-                <div class="header">{{u.name}}</div>
-                <div class="meta">
-                  {{u.email_address}}
+            <div class="item"  *ngFor="let u of users">  
+              <div class="ui grid form">
+                <div class="four wide column">
+                  <h3>{{u.name}}</h3>
+                  {{u.email_address}}<br>
+                  Joined: <br>{{u.created_on | date:'short'}}
                 </div>
-                <div class="description">
-                  <p></p>
+                
+                <div class="six wide column">
+                  <div class="ui toggle checkbox" style="margin-top: 5px;">
+                    <input type="checkbox" 
+                           name="enabled"
+                           [(ngModel)]="u.is_enabled">
+                    <label>Account Enabled</label>
+                  </div>
+                  <div class="ui toggle checkbox" style="margin-top: 5px;">
+                    <input type="checkbox" 
+                           name="threadEmailNotifications"
+                           [(ngModel)]="u.notify_on_new_thread">
+                    <label>Thread Email Notifications</label>
+                  </div>
+                  <div class="ui toggle checkbox" style="margin-top: 5px;">
+                    <input type="checkbox" 
+                           name="postEmailNotifications"
+                           [(ngModel)]="u.notify_on_new_post">
+                    <label>Post Email Notifications</label>
+                  </div>
                 </div>
-                <div class="extra">
-                  <div class="ui blue basic label">{{u.role}}</div>
-                  <div class="ui right floated disabled mini green button">
-                    Edit
-                  </div>
-                  <div class="ui right floated disabled mini red button">
-                    Delete
-                  </div>
+                <div class="six wide column">
+                  <div class="field">
+                    <label>Role</label>
+                    <select class="ui dropdown" [(ngModel)]="u.role">
+                      <option value="admin">Admin</option>
+                      <option value="user">User</option>
+                    </select>
+                  <div>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
         
       </div>
@@ -88,6 +95,10 @@ export class AdminUsersComponent {
   ngOnInit() {
     this.dataService.getUsers().then(users => this.users = users);
     
+  }
+
+  output(u: User) {
+    alert(JSON.stringify(u));
   }
 
 }

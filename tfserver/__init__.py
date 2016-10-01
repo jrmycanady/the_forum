@@ -99,6 +99,8 @@ class User(BaseModel):
     modified_on = DateTimeField(default=utc_datetime_now)
     post_count = BigIntegerField(default=0)
     thread_count = BigIntegerField(default=0)
+    notify_on_new_thread = BooleanField(default=False)
+    notify_on_new_post = BooleanField(default=False)
 
     def sanitized_update(self, name, email_address):
         self.name = sanitize_markdown_input(name)
@@ -148,9 +150,9 @@ def loadMockTasks():
     """
     Creates mock tasks for testing.
     """
-    u1 = User(name="test", password=hash_password("test2"), email_address="test@test.example", role="admin")
+    u1 = User(name="test", password=hash_password("test2"), email_address="test@test.example", role="admin", is_enabled=True)
     u1.save()
-    u2 = User(name="test2", password=hash_password("test3"), email_address="test@test.example")
+    u2 = User(name="test2", password=hash_password("test3"), email_address="test@test.example" , is_enabled=True, notify_on_new_thread=True)
     u2.save()
 
     t1 = Thread(title='thread 1', user=u1, email_address="test@test.example")
@@ -519,7 +521,12 @@ def r_user(user_id):
                 'role': u.role,
                 'email_address': u.email_address,
                 'created_on': u.created_on,
-                'modified_on': u.modified_on
+                'modified_on': u.modified_on,
+                'is_enabled': u.is_enabled,
+                'post_count': u.post_count,
+                'thread_count': u.thread_count,
+                'notify_on_new_post': u.notify_on_new_post,
+                'notify_on_new_thread': u.notify_on_new_thread
             })
         return_data = create_success_response(return_users)
         return(jsonify(return_data), 200)
@@ -558,7 +565,12 @@ def r_user_id(user_id, managed_user_id=None):
             'role': u.role,
             'email_address': u.email_address,
             'created_on': u.created_on,
-            'modified_on': u.modified_on
+            'modified_on': u.modified_on,
+            'is_enabled': u.is_enabled,
+            'post_count': u.post_count,
+            'thread_count': u.thread_count,
+            'notify_on_new_post': u.notify_on_new_post,
+            'notify_on_new_thread': u.notify_on_new_thread
         }
         return_data = create_success_response(return_user)
         return(jsonify(return_data), 200)
@@ -609,10 +621,6 @@ def r_user_id(user_id, managed_user_id=None):
                     u.save()
                 return(jsonify(return_data), 200)
 
-                # u.password = hash_password(data['password'])
-                # u.save()
-                # return_data = create_success_response([])
-                # return(jsonify(return_data), 200)
         except KeyError:
             pass
 
