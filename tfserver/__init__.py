@@ -543,8 +543,20 @@ def r_user(user_id):
 
         try:
             with db.atomic():
-                User.create(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
-
+                #u = User.create(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
+                u = User(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
+                if 'is_enabled' in data:
+                    u.is_enabled = data['is_enabled']
+                if 'notify_on_new_thread' in data:
+                    u.notify_on_new_thread = data['notify_on_new_thread']
+                if 'notify_on_new_post' in data:
+                    u.notify_on_new_post = data['notify_on_new_post']
+                if 'role' in data:
+                    if data['role'] in ROLES.__members__:
+                        u.role = data['role']
+                    else:
+                        return_data = create_error_response('Unknonw role.', ERROR_CODES.UNKNOWN_ROLE)
+                u.save()
                 return_data = create_success_response([])
                 return(jsonify(return_data), 200)
         except peewee.IntegrityError:

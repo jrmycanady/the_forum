@@ -28,7 +28,7 @@ import { User } from '../../models/user.model';
         <div class="ui form attached segment">
           
           <div class="ui two column grid">
-            <div class="eleven wide column">
+            <div class="ten wide column">
               <div class="field">
                 <input type="text" placeholder="Username" name="username"
                        [(ngModel)]="user.name">
@@ -43,20 +43,33 @@ import { User } from '../../models/user.model';
               </div>
             </div>
 
-            <div class="three wide column">
+            <div class="five wide column">
               <div class="field">
-                <label>Settings</label>
-                <div class="ui toggle checkbox">
-                  <input type="checkbox">
-                  <label>Admin</label>
+               
+                <div class="ui toggle checkbox" style="margin-top: 5px;">
+                  <input type="checkbox" 
+                          name="enabled"
+                          [(ngModel)]="user.is_enabled">
+                  <label>Account Enabled</label>
                 </div>
-              </div>
+                <div class="ui toggle checkbox" style="margin-top: 5px;">
+                  <input type="checkbox" 
+                          name="threadEmailNotifications"
+                          [(ngModel)]="user.notify_on_new_thread">
+                  <label>Thread Email Notifications</label>
+                </div>
+                <div class="ui toggle checkbox" style="margin-top: 5px;">
+                  <input type="checkbox" 
+                          name="postEmailNotifications"
+                          [(ngModel)]="user.notify_on_new_post">
+                  <label>Post Email Notifications</label>
+                </div>
+                <label>Role</label>
+                <select class="ui dropdown" [(ngModel)]="user.role">
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                </select>
 
-              <div class="field">
-                <div class="ui toggle checkbox">
-                  <input type="checkbox">
-                  <label>Enabled</label>
-                </div>
               </div>
               
             </div>

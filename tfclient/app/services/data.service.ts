@@ -142,7 +142,7 @@ export class DataService {
    * @param {string} emailAddress = The users email address.
    */
   createUser(user: User) {
-    return this.http.post( (this.baseUrl + 'user/'), { name: user.name, password: user.password, email_address: user.email_address}, {headers: this.authService.authJSONHeader})
+    return this.http.post( (this.baseUrl + 'user/'), user, {headers: this.authService.authJSONHeader})
                     .toPromise()
                     .then(response => { return true })
                     .catch(this.handleHttpError);
