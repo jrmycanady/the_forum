@@ -15,7 +15,7 @@ from enum import Enum
 from argon2 import PasswordHasher
 import argon2
 
-from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField
+from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField, BigIntegerField
 from peewee import JOIN
 from peewee import SQL
 import peewee
@@ -97,6 +97,8 @@ class User(BaseModel):
     email_address = CharField()
     created_on = DateTimeField(default=utc_datetime_now)
     modified_on = DateTimeField(default=utc_datetime_now)
+    post_count = BigIntegerField(default=0)
+    thread_count = BigIntegerField(default=0)
 
     def sanitized_update(self, name, email_address):
         self.name = sanitize_markdown_input(name)
@@ -114,6 +116,8 @@ class Thread(BaseModel):
     last_post_on = DateTimeField(default=utc_datetime_now)
     created_on = DateTimeField(default=utc_datetime_now)
     user = ForeignKeyField(User, related_name='threads')
+    post_count = BigIntegerField(default=0)
+    viewed_count = BigIntegerField(default=0)
 
     def sanitized_update(self, title):
         self.title = sanitize_markdown_input(title)
