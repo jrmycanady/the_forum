@@ -9,6 +9,7 @@ import { Thread } from '../models/thread.model';
 import { Post } from '../models/post.model';
 import { User } from '../models/user.model';
 import { ResponseMetaData } from '../models/response-meta-data.model';
+import { TFSettings } from '../models/tf-settings.model';
 import { AuthService } from './auth.service';
 
 
@@ -233,7 +234,13 @@ export class DataService {
                     }).catch(this.handleHttpError);
   }
 
-  
+  getTFSettings(): Promise<TFSettings> {
+    return this.http.get( (this.baseUrl + 'setting/'), {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().data as TFSettings
+                    })
+  }
 
   /**
    * Gloal handler for non "successful" http responses.

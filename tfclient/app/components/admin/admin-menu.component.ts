@@ -12,7 +12,9 @@ import { Router } from '@angular/router';
         <i class="Users icon"></i>
         Users
       </a>
-      <a class="disabled item">
+      <a class="item"
+         [class.active]="selected == 'settings'"
+         [routerLink]="['/admin/settings']">
         <i class="Settings icon"></i>
         Settings
       </a>

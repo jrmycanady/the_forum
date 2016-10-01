@@ -22,6 +22,7 @@ import { UserMenuComponent } from './components/user/user-menu.component';
 import { UserSecurityComponent } from './components/user/user-security.component';
 import { UserProfileComponent } from './components/user/user-profile.component';
 import { UserSettingsComponent } from './components/user/user-settings.component';
+import { AdminSettingsComponent } from './components/admin/admin-settings.component';
 
 // Guards
 import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
@@ -53,7 +54,8 @@ import { AuthService } from './services/auth.service';
     UserMenuComponent,
     UserSecurityComponent,
     UserProfileComponent,
-    UserSettingsComponent
+    UserSettingsComponent,
+    AdminSettingsComponent
   ],
   providers: [
     appRoutingProviders,

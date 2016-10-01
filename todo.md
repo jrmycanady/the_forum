@@ -34,7 +34,7 @@
 
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
-
+* [settings] Create model and component for managing global settings.
 * [Permissions] Do them propertly.
 * [Security] Pass user object istead of just id. Good for permissions.
 

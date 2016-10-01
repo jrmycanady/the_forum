@@ -143,7 +143,27 @@ class UserViewedThread(BaseModel):
     thread = ForeignKeyField(Thread)
     last_viewed = DateTimeField(default=utc_datetime_now)
 
+class TFSettings(BaseModel):
+    general_forum_title = CharField(default="It's A Forum")
 
+    jwt_token = CharField(default='CHANGE_ME_NOW!')
+    jwt_use_db_token = BooleanField(default=False)
+    
+    email_notifications_thread_enabled = BooleanField(default=False)
+    email_notifications_posts_enabled = BooleanField(default=False)
+    email_notification_from_address = CharField(default="TheForums@example.com")
+    email_notifications_thread_subject_template = CharField(default="[<forum_title>] New Thread: ")
+    email_notifications_post_subject_template = CharField(default="[<forum_title>] New Thread: ")
+
+def safeBuildTables():
+    db.create_tables([User,Thread,Post,UserViewedThread, TFSettings], safe=True)
+
+def safeBuildSettings():
+    try:
+        tfs = TFSettings.get(TFSettings.id == 1)
+    except TFSettings.DoesNotExist:
+        tfs = TFSettings()
+        tfs.save()
 
 def loadMockTasks():
     """
@@ -196,6 +216,7 @@ class ERROR_CODES(Enum):
     NOT_ALLOWED_TO_SELF_ACCOUNT = 9
     UNKNOWN_ROLE = 10
     USER_ACCOUNT_IS_DISABLED = 11
+    NOT_CONFIGURED = 12
 
 class ROLES(Enum):
     user = 1
@@ -725,4 +746,40 @@ def r_user_id(user_id, managed_user_id=None):
         return_data = create_error_response('The user could not be changed.', ERROR_CODES.REQUEST_NOT_FULFILLED)
         return(jsonify(return_data), 200)
 
+@app.route('/api/setting/', methods=['GET'])
+@require_jwt_authenticate
+def r_setting(user_id):
+    # Validate the user permissions
+    try:
+        acting_user = User.get(User.id == user_id)
+    except User.DoesNotExist:
+        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
+        return(jsonify(return_data), 404)
 
+    if(acting_user.role != 'admin'):
+        return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+        return(jsonify(return_data), 401)
+
+    try: 
+        s = TFSettings.get(TFSettings.id == 1)
+        return_settings = {
+            'general_forum_title': s.general_forum_title,
+            'jwt_use_db_token': s.jwt_use_db_token,
+            'email_notifications_thread_enabled': s.email_notifications_thread_enabled,
+            'email_notifications_posts_enabled': s.email_notifications_posts_enabled,
+            'email_notification_from_address': s.email_notification_from_address,
+            'email_notifications_thread_subject_template': s.email_notifications_thread_subject_template,
+            'email_notifications_post_subject_template': s.email_notifications_post_subject_template
+        }
+        return_data = create_success_response(return_settings)
+        return(jsonify(return_data), 200)
+    except TFSettings.DoesNotExist:
+        return_data = create_error_response("The server appears to not be configured.", ERROR_CODES.NOT_CONFIGURED)
+        return(jsonify(return_data), 200)
+
+
+# Items to run on load.
+
+# Build the settings if the DB doesn't have them.'
+#safeBuildTables()
+#safeBuildSettings()

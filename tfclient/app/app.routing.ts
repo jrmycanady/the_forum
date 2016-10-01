@@ -12,6 +12,8 @@ import { UserComponent } from './components/user/user.component';
 import { UserSecurityComponent } from './components/user/user-security.component';
 import { UserProfileComponent } from './components/user/user-profile.component';
 import { UserSettingsComponent } from './components/user/user-settings.component';
+import { AdminSettingsComponent } from './components/admin/admin-settings.component';
+
 
 
 import { CanActivateViaAuthenticated } from './guards/can-activate-via-authenticated.guard';
@@ -54,7 +56,8 @@ const appRoutes: Routes = [
         pathMatch: 'full'
       },
       { path: 'users', component: AdminUsersComponent },
-      { path: 'new-user', component: AdminNewUserComponent }
+      { path: 'new-user', component: AdminNewUserComponent },
+      { path: 'settings', component: AdminSettingsComponent}
     ]
   },
   {
