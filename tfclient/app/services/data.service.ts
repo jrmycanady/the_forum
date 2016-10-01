@@ -47,6 +47,15 @@ export class DataService {
                     .catch(this.handleHttpError);
   }
 
+  /**
+   * Returns the data for one user.
+   */
+  getUser(user_id): Promise<User> {
+    return this.http.get( (this.baseUrl + 'user/' + user_id ), {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => response.json().data as User)
+                    .catch(this.handleHttpError);
+  }
 
   /**
    * Returns all the threads in the forum.
@@ -223,6 +232,8 @@ export class DataService {
                       return response.json().meta as ResponseMetaData;
                     }).catch(this.handleHttpError);
   }
+
+  
 
   /**
    * Gloal handler for non "successful" http responses.

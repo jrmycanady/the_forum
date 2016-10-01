@@ -47,8 +47,8 @@
 * [post] Markdown link button. - Modal Required
 * [new-thread] Markdown help menu. - Modal Required
 * [new-thread] Markdown link button. - Modal Required
-
-
+* [security] Block user api to only admins.
+* [button] Make buttons change when changes are pending. 
 
 
 * [general] Button disabling on REST calls. (Prevent double submit, etc.)

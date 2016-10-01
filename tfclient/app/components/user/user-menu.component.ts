@@ -7,18 +7,20 @@ import { Router } from '@angular/router';
     
     <div class="ui secondary vertical pointing menu">
       <a class="item"
-          [class.active]="selected == 'profile'"
-          [routerLink]="['/user/profile']">
+         [class.active]="selected == 'profile'"
+         [routerLink]="['/user/profile']">
         <i class="User icon"></i>
         Profile
       </a>
       <a class="item"
-          [class.active]="selected == 'security'"
-          [routerLink]="['/user/security']">
+         [class.active]="selected == 'security'"
+         [routerLink]="['/user/security']">
         <i class="Lock icon"></i>
         Security
       </a> 
-      <a class="disabled item">
+      <a class="item"
+        [class.active]="selected == 'settings'"
+        [routerLink]="['/user/settings']">
         <i class="Settings icon"></i>
         Settings
       </a>
