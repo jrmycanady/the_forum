@@ -29,21 +29,28 @@
 * [admin] Manage notification settings.
 * [user] Add "enabled" option to user account.
 * [user] Manage notification settings.
+* [settings] Create model and component for managing global settings.
+* [security] Allow the server to use a specified JWT key. (Also rename setting to key not token.)
 
 #### TODO
 
+* [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
-* [settings] Create model and component for managing global settings.
-* [Permissions] Do them propertly.
-* [Security] Pass user object istead of just id. Good for permissions.
 
 
 * [stats] Track posts per user.
 * [stats] Track threads per user.
 * [admin] Create stats section with total data.
 * [user] Create stats section.
+
+* [setting] Use settings for JWT key when correct.
+
+
 * [admin] Route guard on admin controller for only admin roled users.
+* [Permissions] Do them propertly.
+* [Security] Pass user object istead of just id. Good for permissions.
+
 
 
 * [login] Give user notice on why login failed. (invalid login creids or account disabled.)

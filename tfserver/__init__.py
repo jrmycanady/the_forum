@@ -45,6 +45,8 @@ db = SqliteDatabase('./data.db', threadlocals=True)
 # Global argon2 password hasher.
 ph = PasswordHasher()
 
+
+
 def sanitize_markdown_input(input):
     return bleach.clean(input, tags=[], attributes={}, styles=[], strip=True)
 
@@ -146,14 +148,20 @@ class UserViewedThread(BaseModel):
 class TFSettings(BaseModel):
     general_forum_title = CharField(default="It's A Forum")
 
-    jwt_token = CharField(default='CHANGE_ME_NOW!')
-    jwt_use_db_token = BooleanField(default=False)
+    jwt_key = CharField(default='CHANGE_ME_NOW!')
+    jwt_use_db_key = BooleanField(default=False)
     
     email_notifications_thread_enabled = BooleanField(default=False)
     email_notifications_posts_enabled = BooleanField(default=False)
     email_notification_from_address = CharField(default="TheForums@example.com")
     email_notifications_thread_subject_template = CharField(default="[<forum_title>] New Thread: ")
     email_notifications_post_subject_template = CharField(default="[<forum_title>] New Thread: ")
+
+
+GLOBALSETTINGS = TFSettings()
+
+def loadTFSetting():
+    GLOBALSETTINGS = TFSettings.get(TFSettings.id == 1)
 
 def safeBuildTables():
     db.create_tables([User,Thread,Post,UserViewedThread, TFSettings], safe=True)
@@ -746,7 +754,7 @@ def r_user_id(user_id, managed_user_id=None):
         return_data = create_error_response('The user could not be changed.', ERROR_CODES.REQUEST_NOT_FULFILLED)
         return(jsonify(return_data), 200)
 
-@app.route('/api/setting/', methods=['GET'])
+@app.route('/api/setting/', methods=['GET', 'PUT'])
 @require_jwt_authenticate
 def r_setting(user_id):
     # Validate the user permissions
@@ -760,22 +768,56 @@ def r_setting(user_id):
         return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
         return(jsonify(return_data), 401)
 
-    try: 
-        s = TFSettings.get(TFSettings.id == 1)
-        return_settings = {
-            'general_forum_title': s.general_forum_title,
-            'jwt_use_db_token': s.jwt_use_db_token,
-            'email_notifications_thread_enabled': s.email_notifications_thread_enabled,
-            'email_notifications_posts_enabled': s.email_notifications_posts_enabled,
-            'email_notification_from_address': s.email_notification_from_address,
-            'email_notifications_thread_subject_template': s.email_notifications_thread_subject_template,
-            'email_notifications_post_subject_template': s.email_notifications_post_subject_template
-        }
-        return_data = create_success_response(return_settings)
-        return(jsonify(return_data), 200)
-    except TFSettings.DoesNotExist:
-        return_data = create_error_response("The server appears to not be configured.", ERROR_CODES.NOT_CONFIGURED)
-        return(jsonify(return_data), 200)
+    if request.method == 'GET':
+        try: 
+            s = TFSettings.get(TFSettings.id == 1)
+            return_settings = {
+                'general_forum_title': s.general_forum_title,
+                'jwt_use_db_key': s.jwt_use_db_key,
+                'email_notifications_thread_enabled': s.email_notifications_thread_enabled,
+                'email_notifications_posts_enabled': s.email_notifications_posts_enabled,
+                'email_notification_from_address': s.email_notification_from_address,
+                'email_notifications_thread_subject_template': s.email_notifications_thread_subject_template,
+                'email_notifications_post_subject_template': s.email_notifications_post_subject_template
+            }
+            return_data = create_success_response(return_settings)
+            return(jsonify(return_data), 200)
+        except TFSettings.DoesNotExist:
+            return_data = create_error_response("The server appears to not be configured.", ERROR_CODES.NOT_CONFIGURED)
+            return(jsonify(return_data), 200)
+
+    if request.method == 'PUT':
+        request.get_json(force=True)
+        data = request.json
+        try: 
+            s = TFSettings.get(TFSettings.id == 1)
+            
+            if 'general_forum_title' in data:
+                s.general_forum_title = data['general_forum_title']
+            if 'jwt_use_db_key' in data:
+                s.jwt_use_db_key = data['jwt_use_db_key']
+            if 'jwt_key' in data:
+                s.jwt_key = data['jwt_key']
+            
+
+            if 'email_notifications_thread_enabled' in data:
+                s.email_notifications_thread_enabled = data['email_notifications_thread_enabled']
+            if 'email_notifications_posts_enabled' in data:
+                s.email_notifications_posts_enabled = data['email_notifications_posts_enabled']
+            if 'email_notification_from_address' in data:
+                s.email_notification_from_address = data['email_notification_from_address']
+            if 'email_notifications_thread_subject_template' in data:
+                s.email_notifications_thread_subject_template = data['email_notifications_thread_subject_template']
+            if 'email_notifications_post_subject_template' in data:
+                s.email_notifications_post_subject_template = data['email_notifications_post_subject_template']
+        
+            s.save()
+            loadTFSetting()
+            return_data = create_success_response([])
+            return(jsonify(return_data), 200)
+        except TFSettings.DoesNotExist:
+            return_data = create_error_response("The server appears to not be configured.", ERROR_CODES.NOT_CONFIGURED)
+            return(jsonify(return_data), 200)
 
 
 # Items to run on load.

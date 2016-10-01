@@ -242,6 +242,14 @@ export class DataService {
                     })
   }
 
+  updateTFSettings(s: TFSettings): Promise<Boolean> {
+    return this.http.put( (this.baseUrl + 'setting/'), s, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => { return true })
+                    .catch(this.handleHttpError);
+
+  }
+
   /**
    * Gloal handler for non "successful" http responses.
    * 

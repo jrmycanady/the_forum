@@ -33,16 +33,16 @@ import { AdminMenuComponent } from './admin-menu.component';
                        [(ngModel)]="settings.title">
               </div>
               <div class="field">
-                <label>JWT Token</label>
-                <input type="text" placeholder="JWT Token" name="jwt_token"
-                       [(ngModel)]="settings.jwt_token">
+                <label>JWT Key</label>
+                <input type="text" placeholder="JWT Key" name="jwt_key"
+                       [(ngModel)]="settings.jwt_key">
               </div>
               <div class="ui toggle checkbox" style="margin-top: 5px;">
                 <div class="field">
                     <input type="checkbox" 
-                              name="jwtUseDBToken"
-                              [(ngModel)]="settings.jwt_use_db_token">
-                    <label>Use custom JWT token</label>
+                              name="jwtUseDBkey"
+                              [(ngModel)]="settings.jwt_use_db_key">
+                    <label>Use custom JWT Key</label>
                 </div>
               </div>
 
@@ -131,6 +131,10 @@ export class AdminSettingsComponent {
   ngOnInit() {
     
     this.dataService.getTFSettings().then(settings => { this.settings = settings});
+  }
+
+  updateNotificationSettings() {
+    this.dataService.updateTFSettings(this.settings);
   }
 
 
