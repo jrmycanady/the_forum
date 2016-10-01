@@ -37,7 +37,7 @@ import { ResponseMetaData } from '../../models/response-meta-data.model';
           <div class="ui one column grid">
             <div class="column">
               <div class="field">
-                <input type="text" placeholder="New Password" name="New Username"
+                <input type="text" placeholder="{{authService.user.name}}" name="New Username"
                        [(ngModel)]="username">
               </div>
             </div>

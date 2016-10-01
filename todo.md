@@ -22,25 +22,28 @@
 * [post] Markdown preview
 * [new-thread] Markdown preview.
 * [post] Block posts with empty string.
+* [new-thread] Tab navigation between thread title and first post.
 
 #### TODO
 
-* [post] Do no submit empty posts.
-* [post] Ghost post instead of actually deleting it.
+* [admin] Remove delete button on user. 
+* [admin] Remove delete button on menu for users.
+* [admin] Add enable/disable user toggle on user page.
 
-* [post] Markdown help menu.
-* [post] Markdown link button.
-* [thread-view] Update date to change if a week old.
-* [new-thread] Tab navigation between thread title and first post.
-
-* [new-thread] Markdown help menu.
-* [new-thread] Markdown link button.
-* [stats] Track posts per user.
-* [stats] Track threads per user.
-* [user] Add user "join" date.
-* [user] Add "enabled" option to user account. 
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
+
+
+* [post] Ghost post instead of actually deleting it.
+* [post] Markdown help menu. - Modal Required
+* [post] Markdown link button. - Modal Required
+* [new-thread] Markdown help menu. - Modal Required
+* [new-thread] Markdown link button. - Modal Required
+
+* [stats] Track posts per user.
+* [stats] Track threads per user.
+* [user] Add "enabled" option to user account.
+
 * [general] Button disabling on REST calls. (Prevent double submit, etc.)
 
 * [post] Add error notifications. (No empty post, etc.)
