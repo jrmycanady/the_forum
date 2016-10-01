@@ -19,17 +19,20 @@
 * [thread-view] Fix look and feel of posts.
 * [post] Allow post editing by user.
 * [post] Allow post deletion by user.
+* [post] Markdown preview
+* [new-thread] Markdown preview.
+* [post] Block posts with empty string.
 
 #### TODO
 
 * [post] Do no submit empty posts.
 * [post] Ghost post instead of actually deleting it.
-* [post] Markdown preview
+
 * [post] Markdown help menu.
 * [post] Markdown link button.
 * [thread-view] Update date to change if a week old.
 * [new-thread] Tab navigation between thread title and first post.
-* [new-thread] Markdown preview.
+
 * [new-thread] Markdown help menu.
 * [new-thread] Markdown link button.
 * [stats] Track posts per user.
