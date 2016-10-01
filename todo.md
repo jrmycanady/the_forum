@@ -28,12 +28,17 @@
 * [admin] Add enable/disable user toggle on user page.
 * [admin] Manage notification settings.
 * [user] Add "enabled" option to user account.
+* [user] Manage notification settings.
 
 #### TODO
 
-* [user] Manage notification settings.
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
+
+* [Permissions] Do them propertly.
+* [Security] Pass user object istead of just id. Good for permissions.
+
+
 * [stats] Track posts per user.
 * [stats] Track threads per user.
 * [admin] Create stats section with total data.

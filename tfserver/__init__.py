@@ -522,54 +522,68 @@ def r_post(user_id, post_id):
 @require_jwt_authenticate
 def r_user(user_id):
 
-    if request.method == 'GET':
+    # Validate the user permissions
+    try:
+        acting_user = User.get(User.id == user_id)
+    except User.DoesNotExist:
+        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
+        return(jsonify(return_data), 404)
 
-        return_users = []
-        for u in User.select().order_by(User.name):
-            return_users.append({
-                'name': u.name,
-                'id': u.id,
-                'role': u.role,
-                'email_address': u.email_address,
-                'created_on': u.created_on,
-                'modified_on': u.modified_on,
-                'is_enabled': u.is_enabled,
-                'post_count': u.post_count,
-                'thread_count': u.thread_count,
-                'notify_on_new_post': u.notify_on_new_post,
-                'notify_on_new_thread': u.notify_on_new_thread
-            })
-        return_data = create_success_response(return_users)
-        return(jsonify(return_data), 200)
+    if request.method == 'GET':
+        if acting_user.role == 'admin':
+            return_users = []
+            for u in User.select().order_by(User.name):
+                return_users.append({
+                    'name': u.name,
+                    'id': u.id,
+                    'role': u.role,
+                    'email_address': u.email_address,
+                    'created_on': u.created_on,
+                    'modified_on': u.modified_on,
+                    'is_enabled': u.is_enabled,
+                    'post_count': u.post_count,
+                    'thread_count': u.thread_count,
+                    'notify_on_new_post': u.notify_on_new_post,
+                    'notify_on_new_thread': u.notify_on_new_thread
+                })
+            return_data = create_success_response(return_users)
+            return(jsonify(return_data), 200)
+        else:
+            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return(jsonify(return_data), 401)
 
     if request.method == 'POST':
-        request.get_json(force=True)
-        data = request.json
+        if acting_user.role == 'admin':
+            request.get_json(force=True)
+            data = request.json
 
-        try:
-            with db.atomic():
-                #u = User.create(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
-                u = User(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
-                if 'is_enabled' in data:
-                    u.is_enabled = data['is_enabled']
-                if 'notify_on_new_thread' in data:
-                    u.notify_on_new_thread = data['notify_on_new_thread']
-                if 'notify_on_new_post' in data:
-                    u.notify_on_new_post = data['notify_on_new_post']
-                if 'role' in data:
-                    if data['role'] in ROLES.__members__:
-                        u.role = data['role']
-                    else:
-                        return_data = create_error_response('Unknonw role.', ERROR_CODES.UNKNOWN_ROLE)
-                u.save()
-                return_data = create_success_response([])
-                return(jsonify(return_data), 200)
-        except peewee.IntegrityError:
-            return_data = create_error_response('The username is not available', ERROR_CODES.NOT_AVAILABLE)
-            return(jsonify(return_data), 422)
-        except KeyError:
-            return_data = create_error_response('Missing a required parameter.', ERROR_CODES.MISSING_PARAMETERS)
-            return(jsonify(return_data), 422)
+            try:
+                with db.atomic():
+                    #u = User.create(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
+                    u = User(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
+                    if 'is_enabled' in data:
+                        u.is_enabled = data['is_enabled']
+                    if 'notify_on_new_thread' in data:
+                        u.notify_on_new_thread = data['notify_on_new_thread']
+                    if 'notify_on_new_post' in data:
+                        u.notify_on_new_post = data['notify_on_new_post']
+                    if 'role' in data:
+                        if data['role'] in ROLES.__members__:
+                            u.role = data['role']
+                        else:
+                            return_data = create_error_response('Unknonw role.', ERROR_CODES.UNKNOWN_ROLE)
+                    u.save()
+                    return_data = create_success_response([])
+                    return(jsonify(return_data), 200)
+            except peewee.IntegrityError:
+                return_data = create_error_response('The username is not available', ERROR_CODES.NOT_AVAILABLE)
+                return(jsonify(return_data), 422)
+            except KeyError:
+                return_data = create_error_response('Missing a required parameter.', ERROR_CODES.MISSING_PARAMETERS)
+                return(jsonify(return_data), 422)
+        else:
+            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return(jsonify(return_data), 401)
 
 @app.route('/api/user/<int:managed_user_id>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
@@ -583,27 +597,34 @@ def r_user_id(user_id, managed_user_id=None):
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
-        return_user = {
-            'name': u.name,
-            'id': u.id,
-            'role': u.role,
-            'email_address': u.email_address,
-            'created_on': u.created_on,
-            'modified_on': u.modified_on,
-            'is_enabled': u.is_enabled,
-            'post_count': u.post_count,
-            'thread_count': u.thread_count,
-            'notify_on_new_post': u.notify_on_new_post,
-            'notify_on_new_thread': u.notify_on_new_thread
-        }
-        return_data = create_success_response(return_user)
-        return(jsonify(return_data), 200)
+        if((user_id == managed_user_id) or admin_user.role == "admin"):
+            return_user = {
+                'name': u.name,
+                'id': u.id,
+                'role': u.role,
+                'email_address': u.email_address,
+                'created_on': u.created_on,
+                'modified_on': u.modified_on,
+                'is_enabled': u.is_enabled,
+                'post_count': u.post_count,
+                'thread_count': u.thread_count,
+                'notify_on_new_post': u.notify_on_new_post,
+                'notify_on_new_thread': u.notify_on_new_thread
+            }
+            return_data = create_success_response(return_user)
+            return(jsonify(return_data), 200)
+        else:
+            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return(jsonify(return_data), 401)
 
     if request.method == 'DELETE':
-        u.delete_instance(recursive=True)
-        return_data = create_success_response([])
-        return(jsonify(return_data), 200)
-
+        if admin_user.role == 'admin':
+            u.delete_instance(recursive=True)
+            return_data = create_success_response([])
+            return(jsonify(return_data), 200)
+        else:
+            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return(jsonify(return_data), 401)
     if request.method == 'PUT':
         request.get_json(force=True)
         data = request.json

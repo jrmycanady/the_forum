@@ -30,7 +30,7 @@ import { User } from '../../models/user.model';
           </div>
         </div>
 
-        <div class="ui form attached segment">
+        <div class="ui form bottom attached segment">
           
           <div class="ui two column grid">
             <div class="column">
@@ -55,10 +55,7 @@ import { User } from '../../models/user.model';
 
         </div>
 
-        <div class="ui one bottom attached buttons">
-          <div class="ui button"
-               (click)="updateNotificationSettings()">Update Notification Settings</div>
-        </div>
+        
 
 
       </div>
