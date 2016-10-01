@@ -824,4 +824,5 @@ def r_setting(user_id):
 
 # Build the settings if the DB doesn't have them.'
 #safeBuildTables()
-#safeBuildSettings()
+safeBuildSettings()
+loadTFSetting()
