@@ -23,26 +23,33 @@
 * [new-thread] Markdown preview.
 * [post] Block posts with empty string.
 * [new-thread] Tab navigation between thread title and first post.
-
-#### TODO
-
 * [admin] Remove delete button on user. 
 * [admin] Remove delete button on menu for users.
 * [admin] Add enable/disable user toggle on user page.
-* [admin] Route guard on admin controller for only admin roled users.
+* [admin] Manage notification settings.
+* [user] Add "enabled" option to user account.
+
+#### TODO
+
+* [user] Manage notification settings.
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
+* [stats] Track posts per user.
+* [stats] Track threads per user.
+* [admin] Create stats section with total data.
+* [user] Create stats section.
+* [admin] Route guard on admin controller for only admin roled users.
 
 
+* [login] Give user notice on why login failed. (invalid login creids or account disabled.)
 * [post] Ghost post instead of actually deleting it.
 * [post] Markdown help menu. - Modal Required
 * [post] Markdown link button. - Modal Required
 * [new-thread] Markdown help menu. - Modal Required
 * [new-thread] Markdown link button. - Modal Required
 
-* [stats] Track posts per user.
-* [stats] Track threads per user.
-* [user] Add "enabled" option to user account.
+
+
 
 * [general] Button disabling on REST calls. (Prevent double submit, etc.)
 

@@ -196,6 +196,7 @@ class ERROR_CODES(Enum):
     PARAMETER_NOT_UNIQUE = 8
     NOT_ALLOWED_TO_SELF_ACCOUNT = 9
     UNKNOWN_ROLE = 10
+    USER_ACCOUNT_IS_DISABLED = 11
 
 class ROLES(Enum):
     user = 1
@@ -267,7 +268,11 @@ def require_jwt_authenticate(f):
     def wrapper(*args, **kwargs):
         u = token_authenticate(request.headers.get('the_forum_token'))
         if u:
-            return f(u.id, *args, **kwargs)
+            if u.is_enabled:
+                return f(u.id, *args, **kwargs)
+            else:
+                return_data = create_error_response("The user account is not enabled..", ERROR_CODES.USER_ACCOUNT_IS_DISABLED)
+                return(jsonify(return_data), 401)
         else:
             return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
