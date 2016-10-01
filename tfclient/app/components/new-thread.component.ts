@@ -27,6 +27,7 @@ import { AuthService } from '../services/auth.service';
             <div class="header item">
               New Thread
             </div>
+            
           </div>
 
           <div class="ui attached segment">
@@ -50,6 +51,7 @@ import { AuthService } from '../services/auth.service';
               <button class="ui disabled button"><i class="Attach icon"></i></button>
               <button class="ui disabled button"><i class="Image icon"></i></button>
             </div>
+            
           </div>
 
           <div class="ui attached segment">

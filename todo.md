@@ -22,6 +22,7 @@
 
 #### TODO
 
+* [post] Do no submit empty posts.
 * [post] Ghost post instead of actually deleting it.
 * [post] Markdown preview
 * [post] Markdown help menu.
@@ -38,6 +39,8 @@
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
 * [general] Button disabling on REST calls. (Prevent double submit, etc.)
+
+* [post] Add error notifications. (No empty post, etc.)
 
 * [admin] Validate input on new user add.
 * [admin] Control role on user add.

@@ -75,19 +75,32 @@ import { Post } from '../models/post.model';
 
 
           <div class="ui top attached segment">
-            <div class="ui small basic icon buttons">
-              <button class="ui disabled button"><i class="Linkify icon"></i></button>
-              <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
-              <button class="ui disabled button"><i class="Header icon"></i></button>
-              <button class="ui disabled button"><i class="Bold icon"></i></button>
-              <button class="ui disabled button"><i class="Quote Left icon"></i></button>
-              <button class="ui disabled button"><i class="Italic icon"></i></button>
-              <button class="ui disabled button"><i class="Attach icon"></i></button>
-              <button class="ui disabled button"><i class="Image icon"></i></button>
+            <div class="ui grid">
+              <div class="ten wide column">
+                <div class="ui small basic icon buttons">
+                  <button class="ui disabled button"><i class="Linkify icon"></i></button>
+                  <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
+                  <button class="ui disabled button"><i class="Header icon"></i></button>
+                  <button class="ui disabled button"><i class="Bold icon"></i></button>
+                  <button class="ui disabled button"><i class="Quote Left icon"></i></button>
+                  <button class="ui disabled button"><i class="Italic icon"></i></button>
+                  <button class="ui disabled button"><i class="Attach icon"></i></button>
+                  <button class="ui disabled button"><i class="Image icon"></i></button>
+                </div>
+              </div>
+              <div class="six wide right aligned column">
+                <div class="ui small basic icon buttons">
+                  <button class="ui right floated button"
+                          [class.active]="previewModeEnalbed == true"
+                          (click)="togglePreviewMode()">
+                          <i class="Unhide icon"></i>Preview</button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="ui attached segment">
-            <form class="ui form" #postForm="ngForm">
+            <form class="ui form" #postForm="ngForm"
+                  *ngIf="previewModeEnalbed == false">
               <div class="field">
                 <textarea 
                   placeholder="Reply goes here..."
@@ -97,6 +110,8 @@ import { Post } from '../models/post.model';
                   (keyup.ctrl.enter)="submitPost()"></textarea>
               </div>
             </form>
+            <div *ngIf="previewModeEnalbed"
+                       [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(postText))"></div>
           </div>
             <div class="ui two bottom attached buttons">
             <div class="ui button">Reset</div>
@@ -123,6 +138,7 @@ export class ThreadViewComponent {
   markdown: Converter = new Converter();
   editedPost: Post = new Post();
   editPostEnabled: Boolean = false;
+  previewModeEnalbed: Boolean = false;
 
   constructor(
     public dataService: DataService,
@@ -143,11 +159,19 @@ export class ThreadViewComponent {
 
   }
 
+  /**
+   * Updates the local copy of the thread data.
+   */
   getThreadData() {
     this.dataService.getThread(this.threadId).then(thread => this.thread = thread);
     this.dataService.getPosts(this.threadId).then(posts => this.posts = posts);
   }
 
+  /**
+   * Deletes the selected post.
+   * 
+   * @param {Post} p - The post that will be deleted.
+   */
   deletePost(p: Post) {
     this.dataService.deletePost(p).then(result => {
       if(result) {
@@ -158,15 +182,25 @@ export class ThreadViewComponent {
     })
   }
 
+  /**
+   * Submits the data currently in the reply field as a post to the thread.
+   */
   submitPost() {
-    this.dataService.createPost(this.threadId, this.postText).then(result => {
-      if(result) {
-        this.postText = '';
-        this.getThreadData();
-      }
-    });
+    if(this.postText) {
+      this.dataService.createPost(this.threadId, this.postText).then(result => {
+        if(result) {
+          this.postText = '';
+          this.getThreadData();
+          this.previewModeEnalbed = false;
+        }
+      });
+    }
+    
   }
 
+  /**
+   * Submits an edit for the post.
+   */
   submitPostEdit(p: Post) {
     this.dataService.updatePost(this.editedPost.id, this.editedPost.content).then(result => {
       if(result) {
@@ -179,16 +213,32 @@ export class ThreadViewComponent {
     })
   }
 
+  /**
+   * Configures the local edited copy of a post.
+   */
   editPost(id: string, content: string) {
     this.editedPost.id = id;
     this.editedPost.content = content;
   }
 
+  /**
+   * Cancle's the editing of a post.
+   */
   cancelPostEdit() {
     this.editedPost.id = "";
     this.editedPost.content = "";
   }
 
+  /**
+   * Toggles the post reply preview mode.
+   */
+  togglePreviewMode() {
+    if(this.previewModeEnalbed) {
+      this.previewModeEnalbed = false;
+    } else {
+      this.previewModeEnalbed = true;
+    }
+  }
   
   
 }
