@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
+
+import { Converter } from "showdown";
 
 import { DataService } from '../services/data.service';
 import { AuthService } from '../services/auth.service';
@@ -41,15 +44,27 @@ import { AuthService } from '../services/auth.service';
 
 
           <div class="ui attached segment">
-            <div class="ui small basic icon buttons">
-              <button class="ui disabled button"><i class="Linkify icon"></i></button>
-              <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
-              <button class="ui disabled button"><i class="Header icon"></i></button>
-              <button class="ui disabled button"><i class="Bold icon"></i></button>
-              <button class="ui disabled button"><i class="Quote Left icon"></i></button>
-              <button class="ui disabled button"><i class="Italic icon"></i></button>
-              <button class="ui disabled button"><i class="Attach icon"></i></button>
-              <button class="ui disabled button"><i class="Image icon"></i></button>
+            <div class="ui grid">
+              <div class="ten wide column">
+                <div class="ui small basic icon buttons">
+                  <button class="ui disabled button"><i class="Linkify icon"></i></button>
+                  <button class="ui disabled button"><i class="Unlinkify icon"></i></button>
+                  <button class="ui disabled button"><i class="Header icon"></i></button>
+                  <button class="ui disabled button"><i class="Bold icon"></i></button>
+                  <button class="ui disabled button"><i class="Quote Left icon"></i></button>
+                  <button class="ui disabled button"><i class="Italic icon"></i></button>
+                  <button class="ui disabled button"><i class="Attach icon"></i></button>
+                  <button class="ui disabled button"><i class="Image icon"></i></button>
+                </div>
+              </div>
+              <div class="six wide right aligned column">
+                <div class="ui small basic icon buttons">
+                  <button class="ui right floated button"
+                          [class.active]="previewModeEnalbed == true"
+                          (click)="togglePreviewMode()">
+                          <i class="Unhide icon"></i>Preview</button>
+                </div>
+              </div>
             </div>
             
           </div>
@@ -59,7 +74,10 @@ import { AuthService } from '../services/auth.service';
                       tabindex="2"
                       placeholder="Thread First Post"
                       [(ngModel)]="threadContent"
-                      name="threadContent"></textarea>
+                      name="threadContent"
+                      *ngIf="previewModeEnalbed == false"></textarea>
+            <div *ngIf="previewModeEnalbed"
+                       [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(threadContent))"></div>
           </div>
 
           <div class="ui one bottom attached buttons">
@@ -80,16 +98,24 @@ export class NewThreadComponent {
   negativeMessage: boolean = false;
   message: string = '';
 
+  markdown: Converter = new Converter();
+  previewModeEnalbed: boolean = false;
+
   constructor(
     public dataService: DataService,
     private route: ActivatedRoute,
     private router: Router,
-    public authService: AuthService) {
+    public authService: AuthService,
+    private domSanitizer: DomSanitizer) {
 
 
   }
 
-
+  /**
+   * Shows a failed message box with the message provided.
+   * 
+   * @param {string} message - The message to show.
+   */
   showFailedMessage(message: string) {
     this.message = message
     this.positiveMessage = false;
@@ -97,6 +123,11 @@ export class NewThreadComponent {
     this.messageHidden = false;
   }
 
+  /**
+   * Shows a successful message box with the message provided.
+   * 
+   * @param {string} message - The message to show.
+   */
   showSuccessMessage(message: string) {
     this.message = message
     this.positiveMessage = true;
@@ -104,6 +135,9 @@ export class NewThreadComponent {
     this.messageHidden = false;
   }
 
+  /**
+   * Submits the form info to create a new thread.
+   */
   submitThread() {
 
     if(!this.threadContent) {
@@ -120,6 +154,17 @@ export class NewThreadComponent {
       });
     }
 
+  }
+
+  /**
+   * Toggles the post reply preview mode.
+   */
+  togglePreviewMode() {
+    if(this.previewModeEnalbed) {
+      this.previewModeEnalbed = false;
+    } else {
+      this.previewModeEnalbed = true;
+    }
   }
 
 }
