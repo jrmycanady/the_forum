@@ -194,6 +194,12 @@ class ERROR_CODES(Enum):
     REQUEST_NOT_FULFILLED = 6
     MINIMUM_LENGTH_NOT_MET = 7
     PARAMETER_NOT_UNIQUE = 8
+    NOT_ALLOWED_TO_SELF_ACCOUNT = 9
+    UNKNOWN_ROLE = 10
+
+class ROLES(Enum):
+    user = 1
+    admin = 1
 
 
 
@@ -554,6 +560,7 @@ def r_user_id(user_id, managed_user_id=None):
 
     try:
         u = User.get(User.id == managed_user_id)
+        admin_user = User.get(User.id == user_id)
     except User.DoesNotExist:
         return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
@@ -586,14 +593,14 @@ def r_user_id(user_id, managed_user_id=None):
 
         # Currently only supports updating for the requesting user.
         try:
-            logger.error('u.id is %s and managed_user_id is %s', (u.id, managed_user_id))
-            if(u.id == managed_user_id):
-                logger.error('id mached')
+            
+            if((user_id == managed_user_id) or admin_user.role == "admin"):
+                
                 user_changed = False
 
                 # Process possible password changes.
                 if 'password' in data:
-                    logger.error('found password %s' % data['password'])
+                    
                     # Validate the password.
                     if len(data['password']) < 8:
                         return_data = create_error_response('The password must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
@@ -603,7 +610,7 @@ def r_user_id(user_id, managed_user_id=None):
                         return_data = create_success_response([])
                 # Process user name change.
                 elif 'name' in data:
-                    logger.error('found name %s' % data['name'])
+                    
                     # Must be of atleast one character in length.
                     if len(data['name']) < 1:
                         return_data = create_error_response('The users name must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
@@ -616,7 +623,35 @@ def r_user_id(user_id, managed_user_id=None):
                             u.name = data['name']
                             user_changed = True
                             return_data = create_success_response([])
-                
+                elif 'is_enabled' in data:
+                    # Only allow disabling others accounts.
+                    if(user_id != managed_user_id):
+                        u.is_enabled = data['is_enabled']
+                        user_changed = True
+                        return_data = create_success_response([])
+                    else:
+                        return_data = create_error_response('Cannot disable the account you are logged in with.', ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
+                elif 'notify_on_new_thread' in data:
+                    u.notify_on_new_thread = data['notify_on_new_thread']
+                    user_changed = True
+                    return_data = create_success_response([])
+
+                elif 'notify_on_new_post' in data:
+                    u.notify_on_new_post = data['notify_on_new_post']
+                    user_changed = True
+                    return_data = create_success_response([])
+
+                elif 'role' in data:
+                    if(user_id != managed_user_id):
+                        if data['role'] in ROLES.__members__:
+                            u.role = data['role']
+                            user_changed = True
+                            return_data = create_success_response([])
+                        else:
+                            return_data = create_error_response('Unknown role.', ERROR_CODES.UNKNOWN_ROLE)
+                    else:
+                        return_data = create_error_response('Cannot change role of the account you are logged in with.', ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
+
                 if user_changed:
                     u.save()
                 return(jsonify(return_data), 200)

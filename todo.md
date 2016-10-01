@@ -29,7 +29,7 @@
 * [admin] Remove delete button on user. 
 * [admin] Remove delete button on menu for users.
 * [admin] Add enable/disable user toggle on user page.
-
+* [admin] Route guard on admin controller for only admin roled users.
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
 

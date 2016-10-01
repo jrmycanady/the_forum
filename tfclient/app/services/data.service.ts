@@ -187,6 +187,44 @@ export class DataService {
   }
 
   /**
+   * Enables/Disables a user.
+   * 
+   * @param {User} user - The user to enable/disable.
+   * @param {boolean} is_enabled - If they should be enabled or not.
+   */
+  enableUser(user: User, is_enabled: boolean): Promise<ResponseMetaData> {
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { is_enabled: is_enabled }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().meta as ResponseMetaData;
+                    }).catch(this.handleHttpError);
+  }
+
+  enableNotifyNewThread(user: User, notify_on_new_thread: boolean): Promise<ResponseMetaData> {
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { notify_on_new_thread: notify_on_new_thread }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().meta as ResponseMetaData;
+                    }).catch(this.handleHttpError);
+  }
+
+  enableNotifyNewPost(user: User, notify_on_new_post: boolean): Promise<ResponseMetaData> {
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { notify_on_new_post: notify_on_new_post }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().meta as ResponseMetaData;
+                    }).catch(this.handleHttpError);
+  }
+
+  changeUserRole(user: User, role: string): Promise<ResponseMetaData> {
+    return this.http.put( (this.baseUrl + 'user/' + user.id), { role: role }, {headers: this.authService.authJSONHeader})
+                    .toPromise()
+                    .then(response => {
+                      return response.json().meta as ResponseMetaData;
+                    }).catch(this.handleHttpError);
+  }
+
+  /**
    * Gloal handler for non "successful" http responses.
    * 
    * 401 - Forces an invalidation of any auth tokens.
