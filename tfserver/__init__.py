@@ -23,7 +23,6 @@ import peewee
 import jwt
 import datetime
 import pytz
-#import uuid
 import logging
 import bleach
 
@@ -278,6 +277,16 @@ def require_jwt_authenticate(f):
             return(jsonify(return_data), 401)
     return wrapper
 
+def send_new_thread_notification(user_email, user_name, thread_title, creating_user):
+    with open('email_test.txt', 'a') as f:
+        f.write(user_name + "(" + user_email + ") [" + thread_title + "] => " + creating_user + "\n")
+    
+def process_new_thread_notifications(thread, posting_user_id):
+    users = User.select(User.name, User.email_address).where(User.notify_on_new_thread == True)
+    for u in users:
+        if u.id != posting_user_id:
+            logger.error("Sending to" + u.name)
+            send_new_thread_notification(u.email_address, u.name, thread.title, thread.user.name)
 
 
 @app.route('/api/auth/', methods=['POST', 'GET'])
@@ -383,7 +392,7 @@ def r_thread(user_id):
         uvt = UserViewedThread(user = u, thread = t)        
         uvt.last_viewed = utc_datetime_now()
         uvt.save()
-
+        process_new_thread_notifications(t, user_id)
         return_data = create_success_response({
                 'title': t.title,
                 'id': t.id,
@@ -475,6 +484,7 @@ def r_thread_post(user_id, thread_id):
         p.save()
         t.last_post_on = utc_datetime_now()
         t.save()
+        
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
