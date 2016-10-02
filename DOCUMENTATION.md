@@ -111,3 +111,55 @@ The only header that needs to be modified for a request is the aburrr using is t
   * **user_uuid:** The UUID of the specific user to operate on.
 * GET
 * DELETE
+
+# Running As a Service
+Make sure you have uwsig installed. 
+
+``` pip install uwsgi ```
+
+### Create uwsgi ini file.
+
+```
+[uwsgi]
+module = wsgi
+master = true
+processes = 1
+#plugins = python
+chdir = /opt/the_forum_v_0.1/tfserver
+socket = tfserver.socket
+#socket = /opt/the_forum_v_0.1/tfserver/tfserver.socket
+chmod-socket = 666
+vacuum = true
+callable = app
+#wsgi-file = tfserver.py
+wsgi-file = tfserver.py
+uid = www-data
+virtualenv = /opt/the_forum_v_0.1/virtenv
+```
+
+### Create service file for systemd.
+[Unit]
+Description=The Forum Service
+##After=syslog.target
+
+[Service]
+WorkingDirectory=/opt/the_forum_v_0.1/tfserver
+ExecStart=/usr/local/bin/uwsgi tfserver.ini
+#ExecStart=uwsgi \
+#       --ini tfserver.ini
+#       --socket /opt/the_forum_v_0.1/tfserver/tfserver.socket
+User=www-data
+Group=www-data
+Restart=on-failure
+KillSignal=SIGQUIT
+Type=notify
+#StandardError=syslog
+NotifyAccess=all
+
+### Make sure permissions are good.
+chmod www-data:www-data /opt/the_forum_v_0.1/
+
+### TODO
+This is just for temporary saving. There are several issues such as the tfserver running as www-data when it should be it's own
+user. Also, the fold locations and such are not final and will likely change  once 
+a deployment model is decided. 
