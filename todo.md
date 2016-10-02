@@ -38,6 +38,7 @@
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
 
+* [thread-view] Display post create/edited dates. 
 
 * [stats] Track posts per user.
 * [stats] Track threads per user.
