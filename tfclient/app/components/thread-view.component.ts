@@ -35,8 +35,7 @@ import { Post } from '../models/post.model';
             <div class="two wide column">
               
               <h3 class="ui header">
-                <a href="#">{{ p. username }}</a>
-                <div class="sub header">Admin</div>
+                <a href="#">{{ p.username }}</a>
                 
               </h3>
  
@@ -56,8 +55,8 @@ import { Post } from '../models/post.model';
                         name = "editPostContent"
                         autofocus
                         (keyup.ctrl.enter)="submitPost()" style="margin-bottom: 3px;"></textarea>
-                      <button class="ui left floated button" (click)="cancelPostEdit()">Cancel</button>
-                      <button class="ui right floated button" (click)="submitPostEdit(p)">Save Update</button>
+                      <button class="ui button" (click)="cancelPostEdit()">Cancel</button>
+                      <button class="ui button" (click)="submitPostEdit(p)">Save Update</button>
                     </div>
                   </div>
                 </div>
@@ -68,6 +67,12 @@ import { Post } from '../models/post.model';
                     <button class="ui button" (click)="editPost(p.id, p.content)"><i class="edit icon"></i></button>
                     <button class="ui button" (click)="deletePost(p)"><i class="erase icon"></i></button>
                   </div>
+                </div>
+                <div class="right aligned sixteen wide column" style="margin: 0px; padding: 0px; margin-right: 5px;">
+                  
+                  <div class="sub header" style="font-size: .7em;">
+                    <span *ngIf="p.created_on != p.modified_on">Edited On: {{p.modified_on | date:'short'}}  --  </span>
+                    Posted On: {{p.created_on | date:'short'}}</div>
                 </div>
               </div>
             </div>

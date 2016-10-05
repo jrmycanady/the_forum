@@ -34,11 +34,14 @@
 
 #### TODO
 
+
+
+* [thread-view] Display post create/edited dates. 
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
 
-* [thread-view] Display post create/edited dates. 
+
 * [thread-view] Periodically check for new posts.
 
 
