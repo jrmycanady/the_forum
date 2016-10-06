@@ -514,6 +514,7 @@ def r_thread_post(user_id, thread_id):
                 'created_on': p.created_on,
                 'modified_on': p.modified_on,
                 'username': p.user.name,
+                'user_join_date': p.user.created_on,
                 'user_id': p.user.id
             })
         return_data = create_success_response(return_posts)

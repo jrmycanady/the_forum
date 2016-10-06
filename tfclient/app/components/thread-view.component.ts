@@ -36,6 +36,8 @@ import { Post } from '../models/post.model';
               
               <h3 class="ui header">
                 <a href="#">{{ p.username }}</a>
+                <div class="sub header" style="font-size: 0.6em;">
+                Joined: {{p.user_join_date | date:'shortDate'}}</div>
                 
               </h3>
  

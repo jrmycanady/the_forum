@@ -5,5 +5,6 @@ export class Post {
   modified_on: Date;
   username: string;
   user_id: string;
+  user_join_date: Date;
 
 }

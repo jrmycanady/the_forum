@@ -11,4 +11,5 @@ export class User {
   thread_count: number;
   notify_on_new_thread: boolean;
   notify_on_new_post: boolean;
+  
 }
