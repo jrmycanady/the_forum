@@ -31,12 +31,14 @@
 * [user] Manage notification settings.
 * [settings] Create model and component for managing global settings.
 * [security] Allow the server to use a specified JWT key. (Also rename setting to key not token.)
+* [thread-view] Display post create/edited dates. 
+* [thread-view] Display user join date on posts.
+* [stats] Track posts per user.
+* [stats] Track threads per user.
 
 #### TODO
 
 
-
-* [thread-view] Display post create/edited dates. 
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
@@ -45,8 +47,8 @@
 * [thread-view] Periodically check for new posts.
 
 
-* [stats] Track posts per user.
-* [stats] Track threads per user.
+
+
 * [admin] Create stats section with total data.
 * [user] Create stats section.
 

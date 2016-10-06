@@ -433,6 +433,10 @@ def r_thread(user_id):
         p = Post(user=u, content=data['content'], thread=t)
         p.save()
 
+        u.post_count += 1
+        u.thread_count += 1
+        u.save()
+
         uvt = UserViewedThread(user = u, thread = t)        
         uvt.last_viewed = utc_datetime_now()
         uvt.save()
@@ -515,7 +519,8 @@ def r_thread_post(user_id, thread_id):
                 'modified_on': p.modified_on,
                 'username': p.user.name,
                 'user_join_date': p.user.created_on,
-                'user_id': p.user.id
+                'user_id': p.user.id,
+                'user_post_count': p.user.post_count
             })
         return_data = create_success_response(return_posts)
         return(jsonify(return_data), 200)
@@ -529,6 +534,8 @@ def r_thread_post(user_id, thread_id):
         p.save()
         t.last_post_on = utc_datetime_now()
         t.save()
+        u.post_count += 1
+        u.save()
         process_new_post_notifications(t, user_id)
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
