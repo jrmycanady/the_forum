@@ -9,3 +9,4 @@ virtenv
 virtualenv
 tfserver/__pycache__
 data.db
+npm-debug*
