@@ -782,6 +782,7 @@ def r_setting(user_id):
             return_settings = {
                 'general_forum_title': s.general_forum_title,
                 'jwt_use_db_key': s.jwt_use_db_key,
+                'jwt_key': '******',
                 'email_notifications_thread_enabled': s.email_notifications_thread_enabled,
                 'email_notifications_posts_enabled': s.email_notifications_posts_enabled,
                 'email_notification_from_address': s.email_notification_from_address,
@@ -805,7 +806,8 @@ def r_setting(user_id):
             if 'jwt_use_db_key' in data:
                 s.jwt_use_db_key = data['jwt_use_db_key']
             if 'jwt_key' in data:
-                s.jwt_key = data['jwt_key']
+                if'jwt_key' != '******':
+                    s.jwt_key = data['jwt_key']
             
 
             if 'email_notifications_thread_enabled' in data:

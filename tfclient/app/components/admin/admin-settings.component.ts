@@ -30,7 +30,7 @@ import { AdminMenuComponent } from './admin-menu.component';
               <div class="field">
                 <label>Forum Title</label>
                 <input type="text" placeholder="Forum Title" name="title"
-                       [(ngModel)]="settings.title">
+                       [(ngModel)]="settings.general_forum_title">
               </div>
               <div class="field">
                 <label>JWT Key</label>
@@ -48,20 +48,10 @@ import { AdminMenuComponent } from './admin-menu.component';
 
             </div>
           </div>
-        </div>
-
-        <div class="ui one bottom attached buttons">
-          <div class="ui button"
-               (click)="updateGeneralSettings()">Update General Settings</div>
-        </div>
-
-        <div class="ui top attached red inverted secondary menu">
-          <div class="header item">
+          <h4 class="ui horizontal divider header">
+            <i class="Alarm icon"></i>
             Notification Settings
-          </div>
-        </div>
-
-        <div class="ui form attached segment">
+          </h4>
           
           <div class="ui one column grid">
             <div class="column">
@@ -111,7 +101,7 @@ import { AdminMenuComponent } from './admin-menu.component';
 
         <div class="ui one bottom attached buttons">
           <div class="ui button"
-               (click)="updateNotificationSettings()">Update Notification Settings</div>
+               (click)="updateGeneralSettings()">Update Notification Settings</div>
         </div>
         
       </div>
@@ -133,7 +123,7 @@ export class AdminSettingsComponent {
     this.dataService.getTFSettings().then(settings => { this.settings = settings});
   }
 
-  updateNotificationSettings() {
+  updateGeneralSettings() {
     this.dataService.updateTFSettings(this.settings);
   }
 

@@ -35,10 +35,11 @@
 * [thread-view] Display user join date on posts.
 * [stats] Track posts per user.
 * [stats] Track threads per user.
+* [settings] Allow updating of forum title and jwt key. Also updated view to use one form.
 
 #### TODO
 
-
+* [setting] Update forum global settings to display save result.
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
