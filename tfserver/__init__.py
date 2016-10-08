@@ -161,7 +161,14 @@ class TFSettings(BaseModel):
 GLOBALSETTINGS = TFSettings()
 
 def loadTFSetting():
+    global GLOBALSETTINGS
     GLOBALSETTINGS = TFSettings.get(TFSettings.id == 1)
+
+def getJWTKey():
+    if GLOBALSETTINGS.jwt_use_db_key == True:
+        return GLOBALSETTINGS.jwt_key
+    else:
+        return app.config['JWT_SECRET_KEY']
 
 def safeBuildTables():
     db.create_tables([User,Thread,Post,UserViewedThread, TFSettings], safe=True)
@@ -264,7 +271,7 @@ def create_success_response(return_data):
 def create_token_from_user(user):
     """ Creates a new JWT token based on the user account.
     """
-    return jwt.encode( {'user_id': str(user.id)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
+    return jwt.encode( {'user_id': str(user.id)}, getJWTKey(), app.config['JWT_ALGORITHM']).decode("utf-8")
 
 def token_authenticate(token):
     """
@@ -272,7 +279,7 @@ def token_authenticate(token):
     """
     if token is not None:
         try:
-            token = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithm=app.config['JWT_ALGORITHM'] )
+            token = jwt.decode(token, getJWTKey(), algorithm=app.config['JWT_ALGORITHM'] )
             u = User.get(User.id == token['user_id'])
             return u
         except User.DoesNotExist:
