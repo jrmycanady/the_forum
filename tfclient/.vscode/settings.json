@@ -4,5 +4,6 @@
     "editor.fontSize": 16,
     "editor.fontLigatures": true,
     "editor.tabSize": 2,
-    "editor.insertSpaces": true
+    "editor.insertSpaces": true,
+    "editor.rulers": [120]
 }

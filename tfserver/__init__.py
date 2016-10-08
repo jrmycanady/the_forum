@@ -2,28 +2,24 @@
 Provides basic forum functionality as a RESTful api.
 """
 
+from enum import Enum
+from functools import wraps
+import logging
+import datetime
 from flask import Flask
 from flask import request
 from flask import jsonify
-
 from werkzeug.security import safe_str_cmp
-
-from functools import wraps
-
-from enum import Enum
-
 from argon2 import PasswordHasher
-import argon2
-
-from peewee import SqliteDatabase, Model, CharField, DateTimeField, ForeignKeyField, TextField, BooleanField, BigIntegerField
+from peewee import (SqliteDatabase, Model, CharField, DateTimeField,
+                    ForeignKeyField, TextField, BooleanField, BigIntegerField)
 from peewee import JOIN
 from peewee import SQL
 import peewee
-
+import argon2
 import jwt
-import datetime
+
 import pytz
-import logging
 import bleach
 
 # Startup the logger.
@@ -150,13 +146,11 @@ class TFSettings(BaseModel):
 
     jwt_key = CharField(default='CHANGE_ME_NOW!')
     jwt_use_db_key = BooleanField(default=False)
-    
     email_notifications_thread_enabled = BooleanField(default=False)
     email_notifications_posts_enabled = BooleanField(default=False)
     email_notification_from_address = CharField(default="TheForums@example.com")
     email_notifications_thread_subject_template = CharField(default="[<forum_title>] New Thread: ")
     email_notifications_post_subject_template = CharField(default="[<forum_title>] New Thread: ")
-
 
 GLOBALSETTINGS = TFSettings()
 
@@ -171,7 +165,7 @@ def getJWTKey():
         return app.config['JWT_SECRET_KEY']
 
 def safeBuildTables():
-    db.create_tables([User,Thread,Post,UserViewedThread, TFSettings], safe=True)
+    db.create_tables([User, Thread, Post, UserViewedThread, TFSettings], safe=True)
 
 def safeBuildSettings():
     try:
@@ -184,9 +178,12 @@ def loadMockTasks():
     """
     Creates mock tasks for testing.
     """
-    u1 = User(name="test", password=hash_password("test2"), email_address="test@test.example", role="admin", is_enabled=True)
+    u1 = User(name="test", password=hash_password("test2"),
+              email_address="test@test.example", role="admin", is_enabled=True)
     u1.save()
-    u2 = User(name="test2", password=hash_password("test3"), email_address="test@test.example" , is_enabled=True, notify_on_new_thread=True)
+    u2 = User(name="test2", password=hash_password("test3"),
+              email_address="test@test.example", is_enabled=True,
+              notify_on_new_thread=True)
     u2.save()
 
     t1 = Thread(title='thread 1', user=u1, email_address="test@test.example")
@@ -213,8 +210,6 @@ def loadMockTasks():
     p1 = Post(content="test", thread=t1, user=u1)
     p1.save()
 
-
-
 class ERROR_CODES(Enum):
     """
     All error codes used within the forum.
@@ -237,10 +232,8 @@ class ROLES(Enum):
     user = 1
     admin = 1
 
-
-
     def __str__(self):
-        return(self.name)
+        return self.name
 
 def create_error_response(error_message, error_code):
     """ Creates a standard error response used by all REST apis.
@@ -271,26 +264,31 @@ def create_success_response(return_data):
 def create_token_from_user(user):
     """ Creates a new JWT token based on the user account.
     """
-    return jwt.encode( {'user_id': str(user.id)}, getJWTKey(), app.config['JWT_ALGORITHM']).decode("utf-8")
+    return jwt.encode({'user_id': str(user.id)}, getJWTKey(),
+                      app.config['JWT_ALGORITHM']).decode("utf-8")
 
 def token_authenticate(token):
     """
-        Validates the token and returns the user is the token is valid. None otherwise.
+        Validates the token and returns the user is the token is valid.
+        None otherwise.
     """
     if token is not None:
         try:
-            token = jwt.decode(token, getJWTKey(), algorithm=app.config['JWT_ALGORITHM'] )
+            token = jwt.decode(token, getJWTKey(),
+                               algorithm=app.config['JWT_ALGORITHM'])
             u = User.get(User.id == token['user_id'])
             return u
         except User.DoesNotExist:
-            logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN." % request.remote_addr)
+            logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN."
+                        % request.remote_addr)
             pass
         except NameError:
             pass
         except jwt.exceptions.DecodeError:
             pass
     else:
-        logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND." % request.remote_addr)
+        logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND."
+                    % request.remote_addr)
 
     return None
 
@@ -306,10 +304,12 @@ def require_jwt_authenticate(f):
             if u.is_enabled:
                 return f(u.id, *args, **kwargs)
             else:
-                return_data = create_error_response("The user account is not enabled..", ERROR_CODES.USER_ACCOUNT_IS_DISABLED)
+                return_data = create_error_response("The user account is not enabled..",
+                                                    ERROR_CODES.USER_ACCOUNT_IS_DISABLED)
                 return(jsonify(return_data), 401)
         else:
-            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return_data = create_error_response("No authorized and valid tokens were provided.",
+                                                ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
     return wrapper
 
@@ -349,10 +349,7 @@ def r_auth():
 
         try:
             u = User.get(User.name == data['username'])
-            # if u.password == hash_password(data['password']):
-            #if ph.verify(u.password, data['password']):
             if validate_hashed_password(u.password, data['password']):
-                #new_token = jwt.encode( {'user_id': str(u.id)}, app.config['JWT_SECRET_KEY'], app.config['JWT_ALGORITHM']).decode("utf-8")
                 new_token = create_token_from_user(u)
                 return_data = create_success_response({
                     "the_forum_token": new_token,
@@ -360,9 +357,9 @@ def r_auth():
                         'name': u.name,
                         'id': u.id,
                         'role': u.role}
-                        })
+                    })
                 logging.warning("LOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
-                return(jsonify(return_data))
+                return(jsonify(return_data), 200)
         except User.DoesNotExist:
             pass
         except NameError:
@@ -374,8 +371,9 @@ def r_auth():
         except argon2.exceptions.VerificationError:
             pass
 
-        logging.warning("LOGIN FAILURE FOR %s FROM %s" % (data['username'], request.remote_addr) )
-        return_data = create_error_response("Failed to authentication with provided credentials", ERROR_CODES.AUTHENTICATION_FAILED)
+        logging.warning("LOGIN FAILURE FOR %s FROM %s" % (data['username'], request.remote_addr))
+        return_data = create_error_response("Failed to authentication with provided credentials",
+                                            ERROR_CODES.AUTHENTICATION_FAILED)
         return(jsonify(return_data), 401)
 
     if request.method == 'GET':
@@ -388,12 +386,13 @@ def r_auth():
                     'name': u.name,
                     'id': u.id,
                     'role': u.role}
-                    })
+            })
             logging.warning("RELOGIN SUCCESS FOR %s FROM %s" % (u.name, request.remote_addr))
-            return(jsonify(return_data))
+            return(jsonify(return_data), 200)
         else:
-            logging.warning("RELOGIN FAILURE FROM %s" % (request.remote_addr) )
-            return_data = create_error_response("Failed to authentication with provided credentials", ERROR_CODES.AUTHENTICATION_FAILED)
+            logging.warning("RELOGIN FAILURE FROM %s" % (request.remote_addr))
+            return_data = create_error_response("Failed to authentication with provided credentials",
+                                                ERROR_CODES.AUTHENTICATION_FAILED)
             return(jsonify(return_data), 401)
 
 
@@ -406,10 +405,15 @@ def r_thread(user_id):
 
         return_threads = []
         # Get only the users viewedthreads.
-        q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id, UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
+        q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id, 
+                                     UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
         # Join iwth all views to get info needed.
-        q2 = Thread.select(Thread.id, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, Thread.user_id, SQL("q1.last_viewed"), User.name).join(User).join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)).order_by(Thread.modified_on.desc()).dicts()
-
+        q2 = Thread.select(Thread.id, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, \
+                           Thread.user_id, SQL("q1.last_viewed"), User.name) \
+                    .join(User) \
+                    .join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)) \
+                    .order_by(Thread.modified_on.desc()) \
+                    .dicts()
         
         for t in q2:
             return_threads.append({
@@ -419,10 +423,8 @@ def r_thread(user_id):
                 'modified_on': t['modified_on'],
                 'last_post_on': t['last_post_on'],
                 'username': t['name'],
-                #'user_id': t['user_id'],
                 'last_viewed': t['last_viewed']
             })
-
 
         return_data = create_success_response(return_threads)
         return(jsonify(return_data), 200)
@@ -444,19 +446,19 @@ def r_thread(user_id):
         u.thread_count += 1
         u.save()
 
-        uvt = UserViewedThread(user = u, thread = t)        
+        uvt = UserViewedThread(user=u, thread=t)        
         uvt.last_viewed = utc_datetime_now()
         uvt.save()
         process_new_thread_notifications(t, user_id)
         return_data = create_success_response({
-                'title': t.title,
-                'id': t.id,
-                'created_on': t.created_on,
-                'modified_on': t.modified_on,
-                'last_post_on': t.last_post_on,
-                'username': t.user.name,
-                'user_id': t.user.id
-            })
+            'title': t.title,
+            'id': t.id,
+            'created_on': t.created_on,
+            'modified_on': t.modified_on,
+            'last_post_on': t.last_post_on,
+            'username': t.user.name,
+            'user_id': t.user.id
+        })
         return(jsonify(return_data), 200)
 
 @app.route('/api/thread/<string:thread_id>', methods=['GET', 'DELETE'])

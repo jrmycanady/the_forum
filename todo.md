@@ -41,7 +41,7 @@
 
 #### TODO
 
-
+* [Security] Pass user object istead of just id. Good for permissions.
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
@@ -60,7 +60,7 @@
 
 * [admin] Route guard on admin controller for only admin roled users.
 * [Permissions] Do them propertly.
-* [Security] Pass user object istead of just id. Good for permissions.
+
 
 
 
