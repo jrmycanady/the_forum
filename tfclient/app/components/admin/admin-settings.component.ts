@@ -17,6 +17,13 @@ import { AdminMenuComponent } from './admin-menu.component';
       </div>
       <div class="twelve wide column">
 
+        <div class="ui message"
+             [class.hidden]="messageHidden"
+             [class.positive]="positiveMessage"
+             [class.negative]="negativeMessage">
+            {{ message }}
+        </div>
+
         <div class="ui top attached red inverted secondary menu">
           <div class="header item">
             Forum Global Settings
@@ -100,7 +107,7 @@ import { AdminMenuComponent } from './admin-menu.component';
         </div>
 
         <div class="ui one bottom attached buttons">
-          <div class="ui button"
+          <div class="ui button" [attr.disabled]="updateButtonDisabled == true"
                (click)="updateGeneralSettings()">Update Notification Settings</div>
         </div>
         
@@ -112,19 +119,52 @@ export class AdminSettingsComponent {
 
   selected: string = 'settings';
   settings: TFSettings = new TFSettings();
+
+  messageHidden: boolean = true;
+  positiveMessage: boolean = false;
+  negativeMessage: boolean = false;
+  message: string = '';
+
+  updateButtonDisabled: boolean = false;
+
   constructor(
     public dataService: DataService,
     public authService: AuthService) {
 
     }
 
+  showFailedMessage(message: string) {
+    this.message = message
+    this.positiveMessage = false;
+    this.negativeMessage = true;
+    this.messageHidden = false;
+  }
+
+  showSuccessMessage(message: string) {
+    this.message = message
+    this.positiveMessage = true;
+    this.negativeMessage = false;
+    this.messageHidden = false;
+  }
+
   ngOnInit() {
     
     this.dataService.getTFSettings().then(settings => { this.settings = settings});
   }
 
+  toggleUpdateButton() {
+    this.updateButtonDisabled = !this.updateButtonDisabled;
+  }
+
   updateGeneralSettings() {
-    this.dataService.updateTFSettings(this.settings);
+    this.toggleUpdateButton();
+    this.dataService.updateTFSettings(this.settings).then(result => {
+      if(result) {
+        this.showSuccessMessage("The settings have been updated.");
+      } else {
+        this.showFailedMessage("The settings failed up update.");
+      }
+    });
   }
 
 
