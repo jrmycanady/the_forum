@@ -6,17 +6,19 @@ from enum import Enum
 from functools import wraps
 import logging
 import datetime
+import argon2
+from argon2 import PasswordHasher
 from flask import Flask
 from flask import request
 from flask import jsonify
 from werkzeug.security import safe_str_cmp
-from argon2 import PasswordHasher
+
 from peewee import (SqliteDatabase, Model, CharField, DateTimeField,
                     ForeignKeyField, TextField, BooleanField, BigIntegerField)
 from peewee import JOIN
 from peewee import SQL
 import peewee
-import argon2
+
 import jwt
 
 import pytz
@@ -27,35 +29,35 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('peewee').setLevel(logging.WARNING)
 logging.getLogger('werkzeug').setLevel(logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 # Build the app.
-app = Flask(__name__)
+app = Flask(__name__) # pylint: disable=C0103
 app.config['JWT_SECRET_KEY'] = 'asdlkfjasdlkj'
 app.config['JWT_ALGORITHM'] = 'HS256'
 app.config['DEBUG'] = True
 
 # Build the database.
-db = SqliteDatabase('./data.db', threadlocals=True)
+db = SqliteDatabase('./data.db', threadlocals=True) # pylint: disable=C0103
 
 # Global argon2 password hasher.
-ph = PasswordHasher()
+ph = PasswordHasher() # pylint: disable=C0103
 
 
 
-def sanitize_markdown_input(input):
-    return bleach.clean(input, tags=[], attributes={}, styles=[], strip=True)
+def sanitize_markdown_input(str_input):
+    return bleach.clean(str_input, tags=[], attributes={}, styles=[], strip=True)
 
 def hash_password(password):
     """ Hashes the password using the proper algorithm.
     """
     return ph.hash(password)
 
-def validate_hashed_password(hash, password):
+def validate_hashed_password(hashed_password, password):
     """ Validates the hashed password matches the password.
     """
     try:
-        ph.verify(hash, password)
+        ph.verify(hashed_password, password)
         return True
     except argon2.exceptions.VerifyMismatchError:
         pass
@@ -154,27 +156,27 @@ class TFSettings(BaseModel):
 
 GLOBALSETTINGS = TFSettings()
 
-def loadTFSetting():
+def load_tfs_setting():
     global GLOBALSETTINGS
     GLOBALSETTINGS = TFSettings.get(TFSettings.id == 1)
 
-def getJWTKey():
-    if GLOBALSETTINGS.jwt_use_db_key == True:
+def get_jwt_key():
+    if GLOBALSETTINGS.jwt_use_db_key:
         return GLOBALSETTINGS.jwt_key
     else:
         return app.config['JWT_SECRET_KEY']
 
-def safeBuildTables():
+def safe_build_tables():
     db.create_tables([User, Thread, Post, UserViewedThread, TFSettings], safe=True)
 
-def safeBuildSettings():
+def safe_build_settings():
     try:
         tfs = TFSettings.get(TFSettings.id == 1)
     except TFSettings.DoesNotExist:
         tfs = TFSettings()
         tfs.save()
 
-def loadMockTasks():
+def load_mock_tasks():
     """
     Creates mock tasks for testing.
     """
@@ -250,7 +252,7 @@ def create_success_response(return_data):
     """ Creates a standard success response used by all REST apis.
     """
     count = 1
-    if type(return_data) is list:
+    if isinstance(return_data, list):
         count = len(return_data)
 
     return {
@@ -264,7 +266,7 @@ def create_success_response(return_data):
 def create_token_from_user(user):
     """ Creates a new JWT token based on the user account.
     """
-    return jwt.encode({'user_id': str(user.id)}, getJWTKey(),
+    return jwt.encode({'user_id': str(user.id)}, get_jwt_key(),
                       app.config['JWT_ALGORITHM']).decode("utf-8")
 
 def token_authenticate(token):
@@ -274,21 +276,20 @@ def token_authenticate(token):
     """
     if token is not None:
         try:
-            token = jwt.decode(token, getJWTKey(),
+            token = jwt.decode(token, get_jwt_key(),
                                algorithm=app.config['JWT_ALGORITHM'])
             u = User.get(User.id == token['user_id'])
             return u
         except User.DoesNotExist:
-            logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN."
-                        % request.remote_addr)
-            pass
+            logger.info("REQUEST REJECTED FROM %s - UNKNOWN_USER_IN_TOKEN.",
+                        request.remote_addr)
         except NameError:
             pass
         except jwt.exceptions.DecodeError:
             pass
     else:
-        logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND."
-                    % request.remote_addr)
+        logger.info("REQUEST REJECTED FROM %s - NO TOKEN FOUND.",
+                    request.remote_addr)
 
     return None
 
@@ -320,7 +321,7 @@ def send_new_thread_notification(user_email, user_name, thread_title, creating_u
 def send_new_post_notification(user_email, user_name, thread_title, creating_user):
     with open('email_test.txt', 'a') as f:
         f.write("[POST] " + user_name + "(" + user_email + ") [" + thread_title + "] => " + creating_user + "\n")
-    
+
 def process_new_thread_notifications(thread, posting_user_id):
     users = User.select(User.name, User.email_address, User.id).where(User.notify_on_new_thread == True)
     for u in users:
@@ -329,7 +330,9 @@ def process_new_thread_notifications(thread, posting_user_id):
             send_new_thread_notification(u.email_address, u.name, thread.title, thread.user.name)
 
 def process_new_post_notifications(thread, posting_user_id):
-    users = User.select(User.name, User.email_address, User.id).join(UserViewedThread).where(UserViewedThread.thread == thread & User.notify_on_new_post == True)
+    users = User.select(User.name, User.email_address, User.id) \
+                .join(UserViewedThread) \
+                .where(UserViewedThread.thread == thread & User.notify_on_new_post == True)
     logger.error(users)
     for u in users:
         if u.id != posting_user_id:
@@ -396,7 +399,7 @@ def r_auth():
             return(jsonify(return_data), 401)
 
 
-@app.route('/api/thread/', methods=['GET','POST'])
+@app.route('/api/thread/', methods=['GET', 'POST'])
 @require_jwt_authenticate
 def r_thread(user_id):
 
@@ -405,7 +408,7 @@ def r_thread(user_id):
 
         return_threads = []
         # Get only the users viewedthreads.
-        q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id, 
+        q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id,
                                      UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
         # Join iwth all views to get info needed.
         q2 = Thread.select(Thread.id, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, \
@@ -414,7 +417,7 @@ def r_thread(user_id):
                     .join(q1, JOIN.LEFT_OUTER, on=(Thread.id == q1.c.thread_id)) \
                     .order_by(Thread.modified_on.desc()) \
                     .dicts()
-        
+
         for t in q2:
             return_threads.append({
                 'title': t['title'],
@@ -437,7 +440,7 @@ def r_thread(user_id):
         u = User.get(User.id == user_id)
         t = Thread(user=u)
         t.sanitized_update(title=data['title'])
-        
+
         t.save()
         p = Post(user=u, content=data['content'], thread=t)
         p.save()
@@ -446,7 +449,7 @@ def r_thread(user_id):
         u.thread_count += 1
         u.save()
 
-        uvt = UserViewedThread(user=u, thread=t)        
+        uvt = UserViewedThread(user=u, thread=t)
         uvt.last_viewed = utc_datetime_now()
         uvt.save()
         process_new_thread_notifications(t, user_id)
@@ -492,7 +495,7 @@ def r_thread_id(user_id, thread_id=None):
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
-@app.route('/api/thread/<string:thread_id>/post/', methods=['GET','POST'])
+@app.route('/api/thread/<string:thread_id>/post/', methods=['GET', 'POST'])
 @require_jwt_authenticate
 def r_thread_post(user_id, thread_id):
     try:
@@ -509,14 +512,14 @@ def r_thread_post(user_id, thread_id):
         try:
             # logger.error('looking for view entry.')
 
-            uvt = UserViewedThread.select().where( (UserViewedThread.user == u) & (UserViewedThread.thread == t) ).get()
+            uvt = UserViewedThread.select().where((UserViewedThread.user == u) & (UserViewedThread.thread == t)).get()
             # logger.error('found view entry')
         except UserViewedThread.DoesNotExist:
             # logger.error('didnt find view entry')
-            uvt = UserViewedThread(user = u, thread = t)
-        
+            uvt = UserViewedThread(user=u, thread=t)
+
         uvt.last_viewed = utc_datetime_now()
-        
+
         uvt.save()
 
         return_posts = []
@@ -538,8 +541,8 @@ def r_thread_post(user_id, thread_id):
         request.get_json(force=True)
         data = request.json
         u = User.get(User.id == user_id)
-        p = Post(user = u, thread = t)
-        p.sanitized_update(content = data['content'])
+        p = Post(user=u, thread=t)
+        p.sanitized_update(content=data['content'])
         p.save()
         t.last_post_on = utc_datetime_now()
         t.save()
@@ -576,7 +579,7 @@ def r_post(user_id, post_id):
         return(jsonify(return_data), 200)
 
     if request.method == 'PUT':
-        if(p.user.id == user_id):
+        if p.user.id == user_id:
             request.get_json(force=True)
             data = request.json
             p.sanitized_update(data['content'])
@@ -585,7 +588,8 @@ def r_post(user_id, post_id):
             return_data = create_success_response([])
             return(jsonify(return_data), 200)
         else:
-            return_data = create_error_response('User does not have permissions to edit the post to edit the post.', ERROR_CODES.UNAUTHORIZED)
+            return_data = create_error_response('User does not have permissions to edit the post to edit the post.',
+                                                ERROR_CODES.UNAUTHORIZED)
             return(jsonify(return_data), 401)
 
 
@@ -597,7 +601,8 @@ def r_user(user_id):
     try:
         acting_user = User.get(User.id == user_id)
     except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find user with id of %s' % managed_user_id,
+                                            ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
@@ -620,7 +625,8 @@ def r_user(user_id):
             return_data = create_success_response(return_users)
             return(jsonify(return_data), 200)
         else:
-            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return_data = create_error_response("No authorized and valid tokens were provided.",
+                                                ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
 
     if request.method == 'POST':
@@ -630,8 +636,8 @@ def r_user(user_id):
 
             try:
                 with db.atomic():
-                    #u = User.create(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
-                    u = User(name=data['name'], password=hash_password(data['password']), email_address=data['email_address'])
+                    u = User(name=data['name'], password=hash_password(data['password']),
+                             email_address=data['email_address'])
                     if 'is_enabled' in data:
                         u.is_enabled = data['is_enabled']
                     if 'notify_on_new_thread' in data:
@@ -653,7 +659,8 @@ def r_user(user_id):
                 return_data = create_error_response('Missing a required parameter.', ERROR_CODES.MISSING_PARAMETERS)
                 return(jsonify(return_data), 422)
         else:
-            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return_data = create_error_response("No authorized and valid tokens were provided.",
+                                                ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
 
 @app.route('/api/user/<int:managed_user_id>', methods=['GET', 'DELETE', 'PUT'])
@@ -664,11 +671,12 @@ def r_user_id(user_id, managed_user_id=None):
         u = User.get(User.id == managed_user_id)
         admin_user = User.get(User.id == user_id)
     except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find user with id of %s'
+                                            % managed_user_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
-        if((user_id == managed_user_id) or admin_user.role == "admin"):
+        if (user_id == managed_user_id) or (admin_user.role == "admin"):
             return_user = {
                 'name': u.name,
                 'id': u.id,
@@ -685,7 +693,8 @@ def r_user_id(user_id, managed_user_id=None):
             return_data = create_success_response(return_user)
             return(jsonify(return_data), 200)
         else:
-            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return_data = create_error_response("No authorized and valid tokens were provided.",
+                                                ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
 
     if request.method == 'DELETE':
@@ -694,7 +703,8 @@ def r_user_id(user_id, managed_user_id=None):
             return_data = create_success_response([])
             return(jsonify(return_data), 200)
         else:
-            return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
+            return_data = create_error_response("No authorized and valid tokens were provided.",
+                                                ERROR_CODES.NOT_LOGGED_IN)
             return(jsonify(return_data), 401)
     if request.method == 'PUT':
         request.get_json(force=True)
@@ -702,44 +712,46 @@ def r_user_id(user_id, managed_user_id=None):
 
         # Currently only supports updating for the requesting user.
         try:
-            
-            if((user_id == managed_user_id) or admin_user.role == "admin"):
-                
+
+            if (user_id == managed_user_id) or (admin_user.role == "admin"):
+
                 user_changed = False
 
                 # Process possible password changes.
                 if 'password' in data:
-                    
                     # Validate the password.
                     if len(data['password']) < 8:
-                        return_data = create_error_response('The password must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                        return_data = create_error_response('The password must be at least 1 characters.',
+                                                            ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
                     else:
                         u.password = hash_password(data['password'])
                         user_changed = True
                         return_data = create_success_response([])
                 # Process user name change.
                 elif 'name' in data:
-                    
                     # Must be of atleast one character in length.
                     if len(data['name']) < 1:
-                        return_data = create_error_response('The users name must be at least 1 characters.', ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
+                        return_data = create_error_response('The users name must be at least 1 characters.',
+                                                            ERROR_CODES.MINIMUM_LENGTH_NOT_MET)
                     else:
-                        # Must be unique. 
+                        # Must be unique.
                         try:
                             uFound = User.get(User.name == data['name'])
-                            return_data = create_error_response('The users name is not unique.', ERROR_CODES.PARAMETER_NOT_UNIQUE)
+                            return_data = create_error_response('The users name is not unique.',
+                                                                ERROR_CODES.PARAMETER_NOT_UNIQUE)
                         except User.DoesNotExist:
                             u.name = data['name']
                             user_changed = True
                             return_data = create_success_response([])
                 elif 'is_enabled' in data:
                     # Only allow disabling others accounts.
-                    if(user_id != managed_user_id):
+                    if user_id != managed_user_id:
                         u.is_enabled = data['is_enabled']
                         user_changed = True
                         return_data = create_success_response([])
                     else:
-                        return_data = create_error_response('Cannot disable the account you are logged in with.', ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
+                        return_data = create_error_response('Cannot disable the account you are logged in with.',
+                                                            ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
                 elif 'notify_on_new_thread' in data:
                     u.notify_on_new_thread = data['notify_on_new_thread']
                     user_changed = True
@@ -751,7 +763,7 @@ def r_user_id(user_id, managed_user_id=None):
                     return_data = create_success_response([])
 
                 elif 'role' in data:
-                    if(user_id != managed_user_id):
+                    if user_id != managed_user_id:
                         if data['role'] in ROLES.__members__:
                             u.role = data['role']
                             user_changed = True
@@ -759,7 +771,8 @@ def r_user_id(user_id, managed_user_id=None):
                         else:
                             return_data = create_error_response('Unknown role.', ERROR_CODES.UNKNOWN_ROLE)
                     else:
-                        return_data = create_error_response('Cannot change role of the account you are logged in with.', ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
+                        return_data = create_error_response('Cannot change role of the account you are logged in with.',
+                                                            ERROR_CODES.NOT_ALLOWED_TO_SELF_ACCOUNT)
 
                 if user_changed:
                     u.save()
@@ -778,15 +791,16 @@ def r_setting(user_id):
     try:
         acting_user = User.get(User.id == user_id)
     except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s' % managed_user_id, ERROR_CODES.NOT_FOUND)
+        return_data = create_error_response('Could not find user with id of %s'
+                                            % user_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
-    if(acting_user.role != 'admin'):
+    if acting_user.role != 'admin':
         return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
         return(jsonify(return_data), 401)
 
     if request.method == 'GET':
-        try: 
+        try:
             s = TFSettings.get(TFSettings.id == 1)
             return_settings = {
                 'general_forum_title': s.general_forum_title,
@@ -807,9 +821,9 @@ def r_setting(user_id):
     if request.method == 'PUT':
         request.get_json(force=True)
         data = request.json
-        try: 
+        try:
             s = TFSettings.get(TFSettings.id == 1)
-            
+
             if 'general_forum_title' in data:
                 s.general_forum_title = data['general_forum_title']
             if 'jwt_use_db_key' in data:
@@ -817,7 +831,7 @@ def r_setting(user_id):
             if 'jwt_key' in data:
                 if'jwt_key' != '******':
                     s.jwt_key = data['jwt_key']
-            
+
 
             if 'email_notifications_thread_enabled' in data:
                 s.email_notifications_thread_enabled = data['email_notifications_thread_enabled']
@@ -829,19 +843,18 @@ def r_setting(user_id):
                 s.email_notifications_thread_subject_template = data['email_notifications_thread_subject_template']
             if 'email_notifications_post_subject_template' in data:
                 s.email_notifications_post_subject_template = data['email_notifications_post_subject_template']
-        
+
             s.save()
-            loadTFSetting()
+            load_tfs_setting()
             return_data = create_success_response([])
             return(jsonify(return_data), 200)
         except TFSettings.DoesNotExist:
             return_data = create_error_response("The server appears to not be configured.", ERROR_CODES.NOT_CONFIGURED)
             return(jsonify(return_data), 200)
 
-
 # Items to run on load.
 
 # Build the settings if the DB doesn't have them.'
-#safeBuildTables()
-safeBuildSettings()
-loadTFSetting()
+#safe_build_tables()
+safe_build_settings()
+load_tfs_setting()
