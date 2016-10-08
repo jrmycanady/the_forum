@@ -108,7 +108,7 @@ import { AdminMenuComponent } from './admin-menu.component';
 
         <div class="ui one bottom attached buttons">
           <div class="ui button" [attr.disabled]="updateButtonDisabled == true"
-               (click)="updateGeneralSettings()">Update Notification Settings</div>
+               (click)="updateGeneralSettings()">Update General Settings</div>
         </div>
         
       </div>
