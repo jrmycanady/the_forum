@@ -38,10 +38,11 @@
 * [settings] Allow updating of forum title and jwt key. Also updated view to use one form.
 * [setting] Update forum global settings to display save result.
 * [setting] Use settings for JWT key when correct.
+* [Security] Pass user object istead of just id. Good for permissions.
+
 
 #### TODO
 
-* [Security] Pass user object istead of just id. Good for permissions.
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.

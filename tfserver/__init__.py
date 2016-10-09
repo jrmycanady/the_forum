@@ -303,7 +303,7 @@ def require_jwt_authenticate(f):
         u = token_authenticate(request.headers.get('the_forum_token'))
         if u:
             if u.is_enabled:
-                return f(u.id, *args, **kwargs)
+                return f(u, *args, **kwargs)
             else:
                 return_data = create_error_response("The user account is not enabled..",
                                                     ERROR_CODES.USER_ACCOUNT_IS_DISABLED)
@@ -326,17 +326,17 @@ def process_new_thread_notifications(thread, posting_user_id):
     users = User.select(User.name, User.email_address, User.id).where(User.notify_on_new_thread == True)
     for u in users:
         if u.id != posting_user_id:
-            logger.error("Sending to" + u.name)
+            #logger.error("Sending to" + u.name)
             send_new_thread_notification(u.email_address, u.name, thread.title, thread.user.name)
 
 def process_new_post_notifications(thread, posting_user_id):
     users = User.select(User.name, User.email_address, User.id) \
                 .join(UserViewedThread) \
                 .where(UserViewedThread.thread == thread & User.notify_on_new_post == True)
-    logger.error(users)
+    #logger.error(users)
     for u in users:
         if u.id != posting_user_id:
-            logger.error("Sending to" + u.name)
+            #logger.error("Sending to" + u.name)
             send_new_post_notification(u.email_address, u.name, thread.title, thread.user.name)
 
 
@@ -401,16 +401,15 @@ def r_auth():
 
 @app.route('/api/thread/', methods=['GET', 'POST'])
 @require_jwt_authenticate
-def r_thread(user_id):
+def r_thread(req_user):
 
     if request.method == 'GET':
-        u = User.get(User.id == user_id)
 
         return_threads = []
         # Get only the users viewedthreads.
         q1 = UserViewedThread.select(UserViewedThread.thread_id, UserViewedThread.id, UserViewedThread.user_id,
-                                     UserViewedThread.last_viewed).where(UserViewedThread.user == u).alias('q1')
-        # Join iwth all views to get info needed.
+                                     UserViewedThread.last_viewed).where(UserViewedThread.user == req_user).alias('q1')
+        # Join with all views to get info needed.
         q2 = Thread.select(Thread.id, Thread.title, Thread.modified_on, Thread.last_post_on, Thread.created_on, \
                            Thread.user_id, SQL("q1.last_viewed"), User.name) \
                     .join(User) \
@@ -437,22 +436,21 @@ def r_thread(user_id):
         data = request.json
 
         # Create thread and post then save a view for the submitting user.
-        u = User.get(User.id == user_id)
-        t = Thread(user=u)
+        t = Thread(user=req_user)
         t.sanitized_update(title=data['title'])
 
         t.save()
-        p = Post(user=u, content=data['content'], thread=t)
+        p = Post(user=req_user, content=data['content'], thread=t)
         p.save()
 
-        u.post_count += 1
-        u.thread_count += 1
-        u.save()
+        req_user.post_count += 1
+        req_user.thread_count += 1
+        req_user.save()
 
-        uvt = UserViewedThread(user=u, thread=t)
+        uvt = UserViewedThread(user=req_user, thread=t)
         uvt.last_viewed = utc_datetime_now()
         uvt.save()
-        process_new_thread_notifications(t, user_id)
+        process_new_thread_notifications(t, req_user.id)
         return_data = create_success_response({
             'title': t.title,
             'id': t.id,
@@ -466,7 +464,7 @@ def r_thread(user_id):
 
 @app.route('/api/thread/<string:thread_id>', methods=['GET', 'DELETE'])
 @require_jwt_authenticate
-def r_thread_id(user_id, thread_id=None):
+def r_thread_id(req_user, thread_id=None):
 
 
 
@@ -497,7 +495,7 @@ def r_thread_id(user_id, thread_id=None):
 
 @app.route('/api/thread/<string:thread_id>/post/', methods=['GET', 'POST'])
 @require_jwt_authenticate
-def r_thread_post(user_id, thread_id):
+def r_thread_post(req_user, thread_id):
     try:
         t = Thread.get(Thread.id == thread_id)
     except Thread.DoesNotExist:
@@ -507,16 +505,15 @@ def r_thread_post(user_id, thread_id):
     if request.method == 'GET':
 
         # The user is viewing the posts so set their view date to now.
-        u = User.get(User.id == user_id)
         uvt = None
         try:
             # logger.error('looking for view entry.')
 
-            uvt = UserViewedThread.select().where((UserViewedThread.user == u) & (UserViewedThread.thread == t)).get()
+            uvt = UserViewedThread.select().where((UserViewedThread.user == req_user) & (UserViewedThread.thread == t)).get()
             # logger.error('found view entry')
         except UserViewedThread.DoesNotExist:
             # logger.error('didnt find view entry')
-            uvt = UserViewedThread(user=u, thread=t)
+            uvt = UserViewedThread(user=req_user, thread=t)
 
         uvt.last_viewed = utc_datetime_now()
 
@@ -540,21 +537,20 @@ def r_thread_post(user_id, thread_id):
     if request.method == 'POST':
         request.get_json(force=True)
         data = request.json
-        u = User.get(User.id == user_id)
-        p = Post(user=u, thread=t)
+        p = Post(user=req_user, thread=t)
         p.sanitized_update(content=data['content'])
         p.save()
         t.last_post_on = utc_datetime_now()
         t.save()
-        u.post_count += 1
-        u.save()
-        process_new_post_notifications(t, user_id)
+        req_user.post_count += 1
+        req_user.save()
+        process_new_post_notifications(t, req_user.id)
         return_data = create_success_response([])
         return(jsonify(return_data), 200)
 
 @app.route('/api/post/<string:post_id>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
-def r_post(user_id, post_id):
+def r_post(req_user, post_id):
     try:
         p = Post.get(Post.id == post_id)
     except Post.DoesNotExist:
@@ -579,7 +575,7 @@ def r_post(user_id, post_id):
         return(jsonify(return_data), 200)
 
     if request.method == 'PUT':
-        if p.user.id == user_id:
+        if p.user.id == req_user.id:
             request.get_json(force=True)
             data = request.json
             p.sanitized_update(data['content'])
@@ -595,15 +591,9 @@ def r_post(user_id, post_id):
 
 @app.route('/api/user/', methods=['GET', 'POST'])
 @require_jwt_authenticate
-def r_user(user_id):
+def r_user(req_user):
 
-    # Validate the user permissions
-    try:
-        acting_user = User.get(User.id == user_id)
-    except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s' % managed_user_id,
-                                            ERROR_CODES.NOT_FOUND)
-        return(jsonify(return_data), 404)
+    acting_user = req_user
 
     if request.method == 'GET':
         if acting_user.role == 'admin':
@@ -665,18 +655,18 @@ def r_user(user_id):
 
 @app.route('/api/user/<int:managed_user_id>', methods=['GET', 'DELETE', 'PUT'])
 @require_jwt_authenticate
-def r_user_id(user_id, managed_user_id=None):
+def r_user_id(req_user, managed_user_id=None):
 
     try:
         u = User.get(User.id == managed_user_id)
-        admin_user = User.get(User.id == user_id)
+        admin_user = req_user
     except User.DoesNotExist:
         return_data = create_error_response('Could not find user with id of %s'
                                             % managed_user_id, ERROR_CODES.NOT_FOUND)
         return(jsonify(return_data), 404)
 
     if request.method == 'GET':
-        if (user_id == managed_user_id) or (admin_user.role == "admin"):
+        if (req_user.id == managed_user_id) or (admin_user.role == "admin"):
             return_user = {
                 'name': u.name,
                 'id': u.id,
@@ -713,7 +703,7 @@ def r_user_id(user_id, managed_user_id=None):
         # Currently only supports updating for the requesting user.
         try:
 
-            if (user_id == managed_user_id) or (admin_user.role == "admin"):
+            if (req_user.id == managed_user_id) or (admin_user.role == "admin"):
 
                 user_changed = False
 
@@ -745,7 +735,7 @@ def r_user_id(user_id, managed_user_id=None):
                             return_data = create_success_response([])
                 elif 'is_enabled' in data:
                     # Only allow disabling others accounts.
-                    if user_id != managed_user_id:
+                    if req_user.id != managed_user_id:
                         u.is_enabled = data['is_enabled']
                         user_changed = True
                         return_data = create_success_response([])
@@ -763,7 +753,7 @@ def r_user_id(user_id, managed_user_id=None):
                     return_data = create_success_response([])
 
                 elif 'role' in data:
-                    if user_id != managed_user_id:
+                    if req_user.id != managed_user_id:
                         if data['role'] in ROLES.__members__:
                             u.role = data['role']
                             user_changed = True
@@ -786,15 +776,10 @@ def r_user_id(user_id, managed_user_id=None):
 
 @app.route('/api/setting/', methods=['GET', 'PUT'])
 @require_jwt_authenticate
-def r_setting(user_id):
+def r_setting(req_user):
     # Validate the user permissions
-    try:
-        acting_user = User.get(User.id == user_id)
-    except User.DoesNotExist:
-        return_data = create_error_response('Could not find user with id of %s'
-                                            % user_id, ERROR_CODES.NOT_FOUND)
-        return(jsonify(return_data), 404)
-
+    acting_user = req_user
+    
     if acting_user.role != 'admin':
         return_data = create_error_response("No authorized and valid tokens were provided.", ERROR_CODES.NOT_LOGGED_IN)
         return(jsonify(return_data), 401)
@@ -856,5 +841,5 @@ def r_setting(user_id):
 
 # Build the settings if the DB doesn't have them.'
 #safe_build_tables()
-safe_build_settings()
-load_tfs_setting()
+#safe_build_settings()
+#load_tfs_setting()
