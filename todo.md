@@ -43,15 +43,24 @@
 
 #### TODO
 
+* [general] Button disabling on REST calls. (Prevent double submit, etc.)
+* [general] Change notification on success/fail.
+
+* [threads] pagination
+* [thread-view] pagination
+
+
 * [deploy] Convert server to be easily deployable. (__main__ stuff)
+
 * [notification] Allow users to be notified on new posts to viewed threads.
 * [notification] Allow users to be notifeid on new threads.
+* [auth] User registration.
+* [auth] User validation via email.
+
+
 
 
 * [thread-view] Periodically check for new posts.
-
-
-
 
 * [admin] Create stats section with total data.
 * [user] Create stats section.
@@ -75,15 +84,11 @@
 * [button] Make buttons change when changes are pending. 
 
 
-* [general] Button disabling on REST calls. (Prevent double submit, etc.)
+
 
 * [post] Add error notifications. (No empty post, etc.)
 
 * [admin] Validate input on new user add.
-* [admin] Control role on user add.
-* [auth] Require user to be "enabled".
-* [admin] Control if user is enabled.
-* [admin] Allow user editing.
 * [admin] Allow user deleting. (Cannot delete self, validate on both server and client.)
 * [admin] Sort use list by name.
 * [auth] Allow token rejection.
@@ -110,4 +115,4 @@
 * [new-thread] Not allow navigation away if started thread.
 * [thread-view] Not allow navigation away if started post.
 * [searching] Allow it, duh.
-* [auth] User validation via email.
+
