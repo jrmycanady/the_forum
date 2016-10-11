@@ -121,8 +121,7 @@ import { Post } from '../models/post.model';
             <div *ngIf="previewModeEnalbed"
                        [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(postText))"></div>
           </div>
-            <div class="ui two bottom attached buttons">
-            <div class="ui button">Reset</div>
+            <div class="ui one bottom attached buttons">
             <div class="ui button" (click)="submitPost()">Submit</div>
           </div>
 
