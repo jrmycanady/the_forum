@@ -81,6 +81,12 @@ import { Post } from '../models/post.model';
             </div>
           </div>
 
+          <div class="ui message"
+             [class.hidden]="messageHidden"
+             [class.positive]="positiveMessage"
+             [class.negative]="negativeMessage">
+            {{ message }}
+          </div>
 
           <div class="ui top attached segment">
             <div class="ui grid">
@@ -122,7 +128,8 @@ import { Post } from '../models/post.model';
                        [innerHTML]="domSanitizer.bypassSecurityTrustHtml(markdown.makeHtml(postText))"></div>
           </div>
             <div class="ui one bottom attached buttons">
-            <div class="ui button" (click)="submitPost()">Submit</div>
+            <div class="ui button" (click)="submitPost()"
+                 [class.disabled]="submitButtonDisabled == true">Submit</div>
           </div>
 
           
@@ -146,6 +153,12 @@ export class ThreadViewComponent {
   editedPost: Post = new Post();
   editPostEnabled: Boolean = false;
   previewModeEnalbed: Boolean = false;
+  submiit
+  messageHidden: boolean = true;
+  positiveMessage: boolean = false;
+  negativeMessage: boolean = false;
+  message: string = '';
+  submitButtonDisabled: boolean = false;
 
   constructor(
     public dataService: DataService,
@@ -163,7 +176,30 @@ export class ThreadViewComponent {
       this.getThreadData();
       
     });
+  }
 
+  /**
+   * Shows a failed message box with the message provided.
+   * 
+   * @param {string} message - The message to show.
+   */
+  showFailedMessage(message: string) {
+    this.message = message
+    this.positiveMessage = false;
+    this.negativeMessage = true;
+    this.messageHidden = false;
+  }
+
+  /**
+   * Shows a successful message box with the message provided.
+   * 
+   * @param {string} message - The message to show.
+   */
+  showSuccessMessage(message: string) {
+    this.message = message
+    this.positiveMessage = true;
+    this.negativeMessage = false;
+    this.messageHidden = false;
   }
 
   /**
@@ -194,13 +230,20 @@ export class ThreadViewComponent {
    */
   submitPost() {
     if(this.postText) {
+      this.toggleSubmit();
       this.dataService.createPost(this.threadId, this.postText).then(result => {
         if(result) {
           this.postText = '';
           this.getThreadData();
           this.previewModeEnalbed = false;
+        } else {
+          this.showFailedMessage("Reply failed to be process.");
         }
+        this.toggleSubmit();
       });
+    } else {
+      this.showFailedMessage("Reply cannot be empty.");
+
     }
     
   }
@@ -245,6 +288,13 @@ export class ThreadViewComponent {
     } else {
       this.previewModeEnalbed = true;
     }
+  }
+
+  /**
+   * Toggles the enablement of the submit button.
+   */
+  toggleSubmit() {
+    this.submitButtonDisabled = !this.submitButtonDisabled;
   }
   
   
