@@ -81,7 +81,8 @@ import { AuthService } from '../services/auth.service';
           </div>
 
           <div class="ui one bottom attached buttons">
-            <div class="ui button" (click)="submitThread()">Submit</div>
+            <div class="ui button" (click)="submitThread()"
+                 [class.disabled]="submitButtonDisabled == true">Submit</div>
           </div>
         </div>
       </div>
@@ -97,6 +98,8 @@ export class NewThreadComponent {
   positiveMessage: boolean = false;
   negativeMessage: boolean = false;
   message: string = '';
+
+  submitButtonDisabled: boolean = false;
 
   markdown: Converter = new Converter();
   previewModeEnalbed: boolean = false;
@@ -147,10 +150,12 @@ export class NewThreadComponent {
       this.showFailedMessage('Title cannot be empty.');
     }
     else {
+      this.toggleSubmit();
       this.dataService.createThread(this.threadTitle, this.threadContent).then(meta => {
         if(!meta.error) {
           this.router.navigate(['/']);
         }
+        this.toggleSubmit();
       });
     }
 
@@ -165,6 +170,13 @@ export class NewThreadComponent {
     } else {
       this.previewModeEnalbed = true;
     }
+  }
+
+  /**
+   * Toggles the enablement of the submit button.
+   */
+  toggleSubmit() {
+    this.submitButtonDisabled = !this.submitButtonDisabled;
   }
 
 }
